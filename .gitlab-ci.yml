@@ -39,7 +39,7 @@ build_kinetic:
     - rm -r lcov
     - cd $CI_PROJECT_DIR/..
   # Clone messages
-    - git clone https://github.com/autowarefoundation/messages.git
+    - git clone https://gitlab.com/autowarefoundation/autoware.ai/messages.git
   # We first build the entire workspace normally
     - colcon build --cmake-args -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage" -DCMAKE_BUILD_TYPE=Debug
   # And then build the tests target. catkin (ROS1) packages add their tests to the tests target
@@ -64,6 +64,9 @@ build_kinetic:
       - $CI_PROJECT_DIR/coverage.tar.gz
     expire_in: 48 hrs 
   coverage: /\s*lines.*:\s(\d+\.\d+\%\s\(\d+\sof\s\d+.*\))/
+  only:
+    - merge_requests
+    - master
     
 build_cross:
   stage: build
@@ -72,24 +75,29 @@ build_cross:
     - docker:dind
   variables:
     ROS_DISTRO: kinetic
-    AUTOWARE_DOCKER_DATE: 20190211
-    AUTOWARE_HOME: $CI_PROJECT_DIR
+    AUTOWARE_DOCKER_DATE: 20190516
+    AUTOWARE_HOME: $CI_PROJECT_DIR/..
     AUTOWARE_TARGET_ARCH: aarch64
     AUTOWARE_TARGET_PLATFORM: generic-aarch64
-    AUTOWARE_BUILD_PATH: $CI_PROJECT_DIR/ros/build-${AUTOWARE_TARGET_PLATFORM}
-    AUTOWARE_INSTALL_PATH: $CI_PROJECT_DIR/ros/install-${AUTOWARE_TARGET_PLATFORM}
-    AUTOWARE_TOOLCHAIN_FILE_PATH: $CI_PROJECT_DIR/ros/cross_toolchain.cmake
+    AUTOWARE_BUILD_PATH: $CI_PROJECT_DIR/build-${AUTOWARE_TARGET_PLATFORM}
+    AUTOWARE_INSTALL_PATH: $CI_PROJECT_DIR/install-${AUTOWARE_TARGET_PLATFORM}
+    AUTOWARE_TOOLCHAIN_FILE_PATH: $CI_PROJECT_DIR/cross_toolchain.cmake
     AUTOWARE_SYSROOT: /sysroot/${AUTOWARE_TARGET_PLATFORM}
   script:
     # - ${AUTOWARE_HOME}/docker/crossbuild/build_cross_image.sh
+    - wget https://raw.githubusercontent.com/autowarefoundation/autoware/master/ros/cross_toolchain.cmake  
     - 'docker run
           -e AUTOWARE_SYSROOT=${AUTOWARE_SYSROOT}
           --rm
           -v ${AUTOWARE_HOME}:${AUTOWARE_HOME}
-          -w ${AUTOWARE_HOME}/ros
-          autoware/build:generic-aarch64-kinetic-20190306
+          -w ${AUTOWARE_HOME}
+          autoware/build:generic-aarch64-kinetic-20190516
           bash
             -c "
+                apt-get update &&
+                apt-get install -y git &&
+                cd $CI_PROJECT_DIR/.. &&
+                git clone https://gitlab.com/autowarefoundation/autoware.ai/messages.git &&
                 source ${AUTOWARE_SYSROOT}/opt/ros/kinetic/setup.bash &&
                 colcon build
                     --merge-install
@@ -102,6 +110,9 @@ build_cross:
                     -DCMAKE_FIND_ROOT_PATH=${AUTOWARE_INSTALL_PATH}
                   "
                   '
+  only:
+    - merge_requests
+    - master
 
 pages:
   stage: deploy
