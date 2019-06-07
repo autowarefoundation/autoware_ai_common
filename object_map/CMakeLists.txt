@@ -73,13 +73,6 @@ target_link_libraries(laserscan2costmap
         ${catkin_LIBRARIES}
         )
 
-### points2costmap ###
-add_executable(points2costmap
-        nodes/points2costmap/points2costmap.cpp
-        )
-target_link_libraries(points2costmap
-        ${catkin_LIBRARIES}
-        )
 
 ### potential_field ###
 add_executable(potential_field
@@ -87,6 +80,7 @@ add_executable(potential_field
         )
 add_dependencies(potential_field
         ${catkin_EXPORTED_TARGETS}
+        autoware_msgs_generate_messages_cpp
         )
 target_link_libraries(potential_field
         ${catkin_LIBRARIES}
@@ -139,7 +133,6 @@ install(TARGETS
             grid_map_filter_lib
             grid_map_filter
             potential_field
-            points2costmap
             laserscan2costmap
             object_map_utils_lib
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
