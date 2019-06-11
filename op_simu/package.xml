@@ -16,6 +16,8 @@
     <build_depend>libglew-dev</build_depend>
     <build_depend>glut</build_depend>
     <build_depend>libx11-dev</build_depend>
+    <build_depend>libxi-dev</build_depend>
+    <build_depend>libxmu-dev</build_depend>
 
     <run_depend>op_utility</run_depend>
     <run_depend>op_planner</run_depend>
@@ -24,8 +26,6 @@
     <run_depend>libglew-dev</run_depend>
     <run_depend>glut</run_depend>
     <run_depend>libx11-dev</run_depend>
-
-
-    <export>
-    </export>
+    <run_depend>libxi-dev</run_depend>
+    <run_depend>libxmu-dev</run_depend>
 </package>
