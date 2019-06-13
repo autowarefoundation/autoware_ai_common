@@ -78,6 +78,44 @@ int isPointLeftFromLine(const geometry_msgs::Point &_target, const geometry_msgs
   return n > 0 ? LEFT : n < 0 ? RIGHT : ONLINE;
 }
 
+
+//Following implementation comes from the website below:
+//Author: Dan Sunday
+//site: http://geomalgorithms.com/a02-_lines.html
+//viewed: 2019/5/20
+double distanceFromSegment( const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2, const geometry_msgs::Point &_p)
+{
+  geometry_msgs::Point v, w;
+  v.x = _l2.x - _l1.x;
+  v.y = _l2.y - _l1.y;
+  v.z = _l2.z - _l1.z;
+  
+  w.x = _p.x - _l1.x;
+  w.y = _p.y - _l1.y;
+  w.z = _p.z - _l1.z;
+  
+  double dot_vw = v.x * w.x + v.y * w.y + v.z * w.z;
+  double dot_vv = v.x * v.x + v.y * v.y + v.z * v.z;
+  
+  if ( dot_vw <= 0 )
+  {
+      return find_distance(_p, _l1);
+  }
+  if ( dot_vv <= dot_vw)
+  {
+      return find_distance(_p, _l2);
+  }
+  
+  double b = dot_vw / dot_vv;
+  geometry_msgs::Point pb;
+  pb.x = _l1.x + b * v.x; 
+  pb.y = _l1.y + b * v.y; 
+  pb.z = _l1.z + b * v.z; 
+  
+  return find_distance(_p, pb);
+}
+
+
 double getPoseYawAngle(const geometry_msgs::Pose &_pose)
 {
   double r, p, y;

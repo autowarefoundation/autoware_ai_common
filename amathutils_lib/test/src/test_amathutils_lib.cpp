@@ -248,6 +248,53 @@ TEST(TestSuite, PointOnTheLine){
 
 	ASSERT_EQ(amathutils::isPointLeftFromLine(p1, line_p1, line_p2), ONLINE) << "Point is on the line ";
 }
+// Point between p1, p2
+TEST(TestSuite, DistanceFromSegment1){
+	geometry_msgs::Point p, line_p1, line_p2;
+	p.x = 1;
+	p.y = 1;
+	p.z = 0;
+	line_p1.x = 0;
+	line_p1.y = 0;
+	line_p1.z = 0;
+	line_p2.x = 2;
+	line_p2.y = 0;
+	line_p2.z = 0;
+
+	ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment( line_p1, line_p2, p), 1.0) << "Point is 1m away from segment";
+}
+
+// Point 2m away from p1
+TEST(TestSuite, DistanceFromSegment2){
+	geometry_msgs::Point p, line_p1, line_p2;
+	p.x = -2;
+	p.y = 0;
+	p.z = 0;
+	line_p1.x = 0;
+	line_p1.y = 0;
+	line_p1.z = 0;
+	line_p2.x = 2;
+	line_p2.y = 0;
+	line_p2.z = 0;
+
+	ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment(line_p1, line_p2, p), 2.0) << "Point is 2m away from p1";
+}
+
+// Point 3m away from p2
+TEST(TestSuite, DistanceFromSegment3){
+	geometry_msgs::Point p, line_p1, line_p2;
+	p.x = 5;
+	p.y = 0;
+	p.z = 0;
+	line_p1.x = 0;
+	line_p1.y = 0;
+	line_p1.z = 0;
+	line_p2.x = 2;
+	line_p2.y = 0;
+	line_p2.z = 0;
+
+	ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment(line_p1, line_p2, p), 3.0) << "Point is 3m away from p1";
+}
 
 TEST(TestSuite, TestYawQuaternion){
 

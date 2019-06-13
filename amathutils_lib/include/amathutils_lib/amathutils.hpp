@@ -58,6 +58,16 @@ bool isIntersectLine(const geometry_msgs::Point &_l1_p1, const geometry_msgs::Po
                      const geometry_msgs::Point &_l2_p1, const geometry_msgs::Point &_l2_p2);
 int isPointLeftFromLine(const geometry_msgs::Point &_target, const geometry_msgs::Point &_line_p1,
                         const geometry_msgs::Point &_line_p2);
+
+/**
+ * @fn distanceFromSegment
+ * @brief calculates the distance between from a point to closest point on a line segment
+ * @param  _l1  first point of line segment        
+ * @param  _l2  second point of line segment        
+ * @param  _p   the point to find distance
+ * @return distance between point _p and line segment(_l1,_l2) 
+ */
+double distanceFromSegment( const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2, const geometry_msgs::Point &_p);
 double getPoseYawAngle(const geometry_msgs::Pose &_pose);
 
 /**
