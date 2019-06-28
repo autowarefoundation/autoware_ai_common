@@ -67,7 +67,7 @@ variables:
 
 build_kinetic:
   stage: build
-  image: ros:kinetic
+  image: ros:kinetic-perception
   variables:
     ROS_DISTRO: kinetic
   <<: *build_common
@@ -104,7 +104,7 @@ build_kinetic:
 
 build_melodic:
   stage: build
-  image: ros:melodic
+  image: ros:melodic-perception
   variables:
     ROS_DISTRO: melodic
   <<: *build_common
