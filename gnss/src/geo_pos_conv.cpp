@@ -54,7 +54,14 @@ void geo_pos_conv::set_plane(double lat, double lon)
 void geo_pos_conv::set_plane(int num)
 {
   int lon_deg, lon_min, lat_deg, lat_min;  // longitude and latitude of origin of each plane in Japan
-  if (num == 1)
+  if (num == 0)
+  {
+    lon_deg = 0;
+    lon_min = 0;
+    lat_deg = 0;
+    lat_min = 0;
+  }
+  else if (num == 1)
   {
     lon_deg = 33;
     lon_min = 0;
