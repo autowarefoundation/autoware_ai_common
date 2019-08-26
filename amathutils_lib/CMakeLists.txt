@@ -32,6 +32,7 @@ add_library(amathutils_lib
         src/Amathutils.cpp
         src/kalman_filter.cpp
         src/time_delay_kalman_filter.cpp
+	src/butterworth_filter.cpp
         )
 target_link_libraries(amathutils_lib
         ${catkin_LIBRARIES}
@@ -62,4 +63,11 @@ if(CATKIN_ENABLE_TESTING)
                     src/kalman_filter.cpp
                     src/time_delay_kalman_filter.cpp)
   target_link_libraries(test-kalman_filter ${catkin_LIBRARIES})
+
+  add_rostest_gtest(test-butterworth_filter 
+                    test/test_butterworth_filter.test
+                    test/src/test_butterworth_filter.cpp
+                    src/butterworth_filter.cpp) 
+  target_link_libraries(test-butterworth_filter ${catkin_LIBRARIES})
+		  
 endif()
