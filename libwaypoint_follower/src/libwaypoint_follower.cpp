@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "waypoint_follower/libwaypoint_follower.h"
+#include "libwaypoint_follower/libwaypoint_follower.h"
 
 int WayPoints::getSize() const
 {

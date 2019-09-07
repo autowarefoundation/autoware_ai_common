@@ -1,5 +1,1 @@
 repositories:
-  vendor/qpoases:
-    type: git
-    url: https://gitlab.com/autowarefoundation/autoware.ai/qpoases_vendor.git
-    version: master

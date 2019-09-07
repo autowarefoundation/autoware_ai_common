@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
         op_utility
         op_planner
         op_simu
-        waypoint_follower
+        libwaypoint_follower
         autoware_msgs
         )
 
@@ -37,7 +37,7 @@ catkin_package(
         op_utility
         op_planner
         op_simu
-        waypoint_follower
+        libwaypoint_follower
         vector_map_msgs
 )
 
