@@ -1,1 +1,13 @@
 repositories:
+  vendor/lanelet2:
+    type: git
+    url: https://github.com/fzi-forschungszentrum-informatik/Lanelet2.git
+    version: master
+  vendor/mrt_cmake_modules:
+    type: git
+    url: https://github.com/KIT-MRT/mrt_cmake_modules.git
+    version: master
+  autoware/messages:
+    type: git
+    url: https://gitlab.com/autowarefoundation/autoware.ai/messages.git
+    version: master
