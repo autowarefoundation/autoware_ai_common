@@ -76,13 +76,11 @@ double WayPoints::getWaypointVelocityMPS(int waypoint) const
   return current_waypoints_.waypoints[waypoint].twist.twist.linear.x;
 }
 
-bool WayPoints::isFront(int waypoint, geometry_msgs::Pose current_pose) const
+bool WayPoints::inDrivingDirection(int waypoint, geometry_msgs::Pose current_pose) const
 {
+  const LaneDirection dir = getLaneDirection(current_waypoints_);
   double x = calcRelativeCoordinate(current_waypoints_.waypoints[waypoint].pose.pose.position, current_pose).x;
-  if (x < 0)
-    return false;
-  else
-    return true;
+  return (x < 0.0 && dir == LaneDirection::Backward) || (x >= 0.0 && dir == LaneDirection::Forward);
 }
 
 double DecelerateVelocity(double distance, double prev_velocity)
@@ -157,73 +155,108 @@ double getRelativeAngle(geometry_msgs::Pose waypoint_pose, geometry_msgs::Pose v
   return angle;
 }
 
+LaneDirection getLaneDirection(const autoware_msgs::Lane& current_path)
+{
+  const LaneDirection pos_ret = getLaneDirectionByPosition(current_path);
+  const LaneDirection vel_ret = getLaneDirectionByVelocity(current_path);
+  const bool is_conflict =
+    (pos_ret != vel_ret) && (pos_ret != LaneDirection::Error) && (vel_ret != LaneDirection::Error);
+  return is_conflict ? LaneDirection::Error : (pos_ret != LaneDirection::Error) ? pos_ret : vel_ret;
+}
+
+LaneDirection getLaneDirectionByPosition(const autoware_msgs::Lane& current_path)
+{
+  if (current_path.waypoints.size() < 2)
+  {
+    return LaneDirection::Error;
+  }
+  LaneDirection positional_direction = LaneDirection::Error;
+  for (int i = 1; i < current_path.waypoints.size(); i++)
+  {
+    const geometry_msgs::Pose& prev_pose = current_path.waypoints[i - 1].pose.pose;
+    const geometry_msgs::Pose& next_pose = current_path.waypoints[i].pose.pose;
+    const double rlt_x = calcRelativeCoordinate(next_pose.position, prev_pose).x;
+    if (fabs(rlt_x) < 1e-3)
+    {
+      continue;
+    }
+    positional_direction = (rlt_x < 0) ? LaneDirection::Backward : LaneDirection::Forward;
+    break;
+  }
+  return positional_direction;
+}
+
+LaneDirection getLaneDirectionByVelocity(const autoware_msgs::Lane& current_path)
+{
+  LaneDirection velocity_direction = LaneDirection::Error;
+  for (const auto waypoint : current_path.waypoints)
+  {
+    const double& vel = waypoint.twist.twist.linear.x;
+    if (fabs(vel) < 0.01)
+    {
+      continue;
+    }
+    velocity_direction = (vel < 0) ? LaneDirection::Backward : LaneDirection::Forward;
+    break;
+  }
+  return velocity_direction;
+}
+
+class MinIDSearch
+{
+private:
+  double val_min_;
+  int idx_min_;
+public:
+  MinIDSearch() : idx_min_(-1), val_min_(DBL_MAX){}
+  void update(int index, double v)
+  {
+    if (v < val_min_)
+    {
+      idx_min_ = index;
+      val_min_ = v;
+    }
+  }
+  const double result() const
+  {
+    return idx_min_;
+  }
+  const bool isOK() const
+  {
+    return (idx_min_ != -1);
+  }
+};
+
 // get closest waypoint from current pose
 int getClosestWaypoint(const autoware_msgs::Lane &current_path, geometry_msgs::Pose current_pose)
 {
+  if (current_path.waypoints.size() < 2 || getLaneDirection(current_path) == LaneDirection::Error)
+    return -1;
+
   WayPoints wp;
   wp.setPath(current_path);
 
-  if (wp.isEmpty())
-    return -1;
-
   // search closest candidate within a certain meter
   double search_distance = 5.0;
-  std::vector<int> waypoint_candidates;
+  double angle_threshold = 90;
+  MinIDSearch cand_idx, not_cand_idx;
   for (int i = 1; i < wp.getSize(); i++)
   {
-    if (getPlaneDistance(wp.getWaypointPosition(i), current_pose.position) > search_distance)
+    if (!wp.inDrivingDirection(i, current_pose))
       continue;
-
-    if (!wp.isFront(i, current_pose))
+    double distance = getPlaneDistance(wp.getWaypointPosition(i), current_pose.position);
+    not_cand_idx.update(i, distance);
+    if (distance > search_distance)
       continue;
-
-    double angle_threshold = 90;
     if (getRelativeAngle(wp.getWaypointPose(i), current_pose) > angle_threshold)
       continue;
-
-    waypoint_candidates.push_back(i);
+    cand_idx.update(i, distance);
   }
-
-  // get closest waypoint from candidates
-  if (!waypoint_candidates.empty())
-  {
-    int waypoint_min = -1;
-    double distance_min = DBL_MAX;
-    for (auto el : waypoint_candidates)
-    {
-      // ROS_INFO("closest_candidates : %d",el);
-      double d = getPlaneDistance(wp.getWaypointPosition(el), current_pose.position);
-      if (d < distance_min)
-      {
-        waypoint_min = el;
-        distance_min = d;
-      }
-    }
-    return waypoint_min;
-  }
-  else
+  if (!cand_idx.isOK())
   {
     ROS_INFO("no candidate. search closest waypoint from all waypoints...");
-    // if there is no candidate...
-    int waypoint_min = -1;
-    double distance_min = DBL_MAX;
-    for (int i = 1; i < wp.getSize(); i++)
-    {
-      if (!wp.isFront(i, current_pose))
-        continue;
-
-      // if (!wp.isValid(i, current_pose))
-      //  continue;
-
-      double d = getPlaneDistance(wp.getWaypointPosition(i), current_pose.position);
-      if (d < distance_min)
-      {
-        waypoint_min = i;
-        distance_min = d;
-      }
-    }
-    return waypoint_min;
   }
+  return (!cand_idx.isOK()) ? not_cand_idx.result() : cand_idx.result();
 }
 
 // let the linear equation be "ax + by + c = 0"

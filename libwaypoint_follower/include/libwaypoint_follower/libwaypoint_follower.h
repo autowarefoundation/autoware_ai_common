@@ -27,6 +27,13 @@
 #include <tf/transform_listener.h>
 #include "autoware_msgs/Lane.h"
 
+enum class LaneDirection : int
+{
+  Backward = -1,
+  Forward = 1,
+  Error = 0
+};
+
 class WayPoints
 {
 protected:
@@ -51,7 +58,7 @@ public:
   {
     return current_waypoints_;
   }
-  bool isFront(int waypoint, geometry_msgs::Pose current_pose) const;
+  bool inDrivingDirection(int waypoint, geometry_msgs::Pose current_pose) const;
 };
 
 // inline function (less than 10 lines )
@@ -82,6 +89,9 @@ geometry_msgs::Point calcAbsoluteCoordinate(geometry_msgs::Point point,
                                                                                 // coordinate
 double getPlaneDistance(geometry_msgs::Point target1,
                         geometry_msgs::Point target2);  // get 2 dimentional distance between target 1 and target 2
+LaneDirection getLaneDirection(const autoware_msgs::Lane& current_path);
+LaneDirection getLaneDirectionByPosition(const autoware_msgs::Lane& current_path);
+LaneDirection getLaneDirectionByVelocity(const autoware_msgs::Lane& current_path);
 int getClosestWaypoint(const autoware_msgs::Lane& current_path, geometry_msgs::Pose current_pose);
 bool getLinearEquation(geometry_msgs::Point start, geometry_msgs::Point end, double* a, double* b, double* c);
 double getDistanceBetweenLineAndPoint(geometry_msgs::Point point, double sa, double b, double c);
