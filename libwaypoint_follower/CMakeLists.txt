@@ -53,3 +53,16 @@ install(TARGETS libwaypoint_follower
 ## Install project namespaced headers
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+
+if (CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest_gtest(test-libwaypoint_follower
+      test/test_libwaypoint_follower.test
+      test/src/test_libwaypoint_follower.cpp
+      src/libwaypoint_follower.cpp
+    )
+    add_dependencies(test-libwaypoint_follower ${catkin_EXPORTED_TARGETS})
+    target_link_libraries(test-libwaypoint_follower
+    ${catkin_LIBRARIES})
+endif ()
