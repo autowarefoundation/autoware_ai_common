@@ -28,7 +28,7 @@
 #include <lanelet2_extension/io/autoware_osm_parser.h>
 #include <lanelet2_extension/utility/utilities.h>
 
-#include <lanelet2_msgs/MapBin.h>
+#include <autoware_lanelet2_msgs/MapBin.h>
 
 #include <string>
 
@@ -75,8 +75,8 @@ int main(int argc, char** argv)
   std::string format_version, map_version;
   lanelet::io_handlers::AutowareOsmParser::parseVersions(lanelet2_filename, &format_version, &map_version);
 
-  ros::Publisher map_bin_pub = rosnode.advertise<lanelet2_msgs::MapBin>("/lanelet_map_bin", 1, true);
-  lanelet2_msgs::MapBin map_bin_msg;
+  ros::Publisher map_bin_pub = rosnode.advertise<autoware_lanelet2_msgs::MapBin>("/lanelet_map_bin", 1, true);
+  autoware_lanelet2_msgs::MapBin map_bin_msg;
   map_bin_msg.header.stamp = ros::Time::now();
   map_bin_msg.header.frame_id = "map";
   map_bin_msg.format_version = format_version;
