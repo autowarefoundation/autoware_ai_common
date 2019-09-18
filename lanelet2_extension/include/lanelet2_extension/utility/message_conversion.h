@@ -23,7 +23,7 @@
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Polygon.h>
 #include <lanelet2_core/LaneletMap.h>
-#include <lanelet2_msgs/MapBin.h>
+#include <autoware_lanelet2_msgs/MapBin.h>
 
 namespace lanelet
 {
@@ -37,7 +37,7 @@ namespace conversion
  * @param map [lanelet map data]
  * @param msg [converted ROS message. Only "data" field is filled]
  */
-void toBinMsg(const lanelet::LaneletMapPtr map, lanelet2_msgs::MapBin* msg);
+void toBinMsg(const lanelet::LaneletMapPtr map, autoware_lanelet2_msgs::MapBin* msg);
 
 /**
  * [fromBinMsg converts ROS message into lanelet2 data. Similar implementation
@@ -45,7 +45,7 @@ void toBinMsg(const lanelet::LaneletMapPtr map, lanelet2_msgs::MapBin* msg);
  * @param msg [ROS message for lanelet map]
  * @param map [Converted lanelet2 data]
  */
-void fromBinMsg(const lanelet2_msgs::MapBin msg, lanelet::LaneletMapPtr map);
+void fromBinMsg(const autoware_lanelet2_msgs::MapBin msg, lanelet::LaneletMapPtr map);
 
 /**
  * [toGeomMsgPt converts various point types to geometry_msgs point]

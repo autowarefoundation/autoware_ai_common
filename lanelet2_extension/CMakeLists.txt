@@ -32,7 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   lanelet2_routing
   lanelet2_traffic_rules
   lanelet2_validation
-  lanelet2_msgs
+  autoware_lanelet2_msgs
   autoware_msgs
   geometry_msgs
   visualization_msgs
@@ -45,7 +45,7 @@ roslint_cpp()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lanelet2_extension_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
+  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
 )
 
 include_directories(

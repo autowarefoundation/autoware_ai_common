@@ -58,7 +58,7 @@ private:
 
 TEST_F(TestSuite, BinMsgConversion)
 {
-  lanelet2_msgs::MapBin bin_msg;
+  autoware_lanelet2_msgs::MapBin bin_msg;
   lanelet::LaneletMapPtr regenerated_map(new lanelet::LaneletMap);
 
   lanelet::utils::conversion::toBinMsg(single_lanelet_map_ptr, &bin_msg);

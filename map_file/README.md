@@ -23,7 +23,7 @@ Then, the /current_pose topic recieved, the map_filter_node publish submap.
 
 ## lanelet2_map_loader
 ### Feature
-lanelet2_map_loader loads Lanelet2 file and publish the map data as lanelet2_msgs/MapBin message.
+lanelet2_map_loader loads Lanelet2 file and publish the map data as autoware_lanelet2_msgs/MapBin message.
 The node projects lan/lon coordinates into MGRS coordinates. 
 
 ### How to run
@@ -31,18 +31,18 @@ Run from CLI:
 `rosrun map_file lanelet2_map_loader path/to/map.osm`
 
 ### Published Topic
-/lanelet_map_bin (lanelet2_msgs/MapBin) : Binary data of loaded Lanelet2 Map.
+/lanelet_map_bin (autoware_lanelet2_msgs/MapBin) : Binary data of loaded Lanelet2 Map.
 
 ## lanelet2_map_visualization
 ### Feature
-lanelet2_map_visualization visualizes lanelet2_msgs/MapBin messages into visualization_msgs/MarkerArray.
+lanelet2_map_visualization visualizes autoware_lanelet2_msgs/MapBin messages into visualization_msgs/MarkerArray.
 
 ### How to run 
 Run from CLI:
 `rosrun map_file lanelet2_map_visualization`
 
 ### Subscribed Topics
-/lanelet_map_bin (lanelet2_msg/MapBin) : binary data of Lanelet2 Map
+/lanelet_map_bin (autoware_lanelet2_msgs/MapBin) : binary data of Lanelet2 Map
 
 ### Published Topics
 /lanelet2_map_viz (visualization_msgs/MarkerArray) : visualization messages for RVIZ

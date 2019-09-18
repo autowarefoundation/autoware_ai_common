@@ -23,7 +23,7 @@
 
 #include <lanelet2_projection/UTM.h>
 #include <lanelet2_core/LaneletMap.h>
-#include <lanelet2_msgs/MapBin.h>
+#include <autoware_lanelet2_msgs/MapBin.h>
 
 #include <lanelet2_extension/utility/message_conversion.h>
 #include <lanelet2_extension/utility/query.h>
@@ -48,7 +48,7 @@ void setColor(std_msgs::ColorRGBA* cl, double r, double g, double b, double a)
   cl->a = a;
 }
 
-void binMapCallback(lanelet2_msgs::MapBin msg)
+void binMapCallback(autoware_lanelet2_msgs::MapBin msg)
 {
   lanelet::LaneletMapPtr viz_lanelet_map(new lanelet::LaneletMap);
 
