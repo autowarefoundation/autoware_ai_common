@@ -1,5 +1,5 @@
-#ifndef NODE_STATUS_PUBLISHER_H_INCLUDED
-#define NODE_STATUS_PUBLISHER_H_INCLUDED
+#ifndef HEALTH_CHECKER_H_INCLUDED
+#define HEALTH_CHECKER_H_INCLUDED
 
 /*
  * Copyright 2019 Autoware Foundation. All rights reserved.
@@ -25,8 +25,8 @@
 
 // headers in Autoware
 #include <autoware_health_checker/constants.h>
-#include <autoware_health_checker/diag_buffer.h>
-#include <autoware_health_checker/rate_checker.h>
+#include <autoware_health_checker/health_checker/diag_buffer.h>
+#include <autoware_health_checker/health_checker/rate_checker.h>
 #include <autoware_system_msgs/NodeStatus.h>
 
 // headers in STL
@@ -44,10 +44,10 @@
 #include <boost/thread.hpp>
 
 namespace autoware_health_checker {
-class NodeStatusPublisher {
+class HealthChecker {
 public:
-  NodeStatusPublisher(ros::NodeHandle nh, ros::NodeHandle pnh);
-  ~NodeStatusPublisher();
+  HealthChecker(ros::NodeHandle nh, ros::NodeHandle pnh);
+  ~HealthChecker();
   void ENABLE();
   uint8_t CHECK_MIN_VALUE(std::string key, double value, double warn_value,
                           double error_value, double fatal_value,
@@ -112,4 +112,4 @@ private:
   bool ros_ok_;
 };
 }
-#endif // NODE_STATUS_PUBLISHER_H_INCLUDED
+#endif // HEALTH_CHECKER_H_INCLUDED
