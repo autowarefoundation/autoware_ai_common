@@ -42,7 +42,8 @@ namespace utils
  */
 void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
                              const lanelet::routing::RoutingGraphPtr routing_graph,
-                             const autoware_msgs::LaneArray& lane_array, std::map<int, int>* waypointid2laneletid);
+                             const autoware_msgs::LaneArray& lane_array,
+                             std::map<int, lanelet::Id>* waypointid2laneletid);
 
 /**
  * @brief  Apply a patch for centerline because the original implementation
