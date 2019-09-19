@@ -35,7 +35,7 @@ constexpr uint8_t TYPE_UNDEFINED =
 constexpr uint8_t TYPE_OUT_OF_RANGE =
     autoware_system_msgs::DiagnosticStatus::OUT_OF_RANGE;
 constexpr uint8_t TYPE_RATE_IS_SLOW =
-    autoware_system_msgs::DiagnosticStatus::RATE_IS_SLOW;
+    autoware_system_msgs::DiagnosticStatus::UNEXPECTED_RATE;
 
 constexpr double BUFFER_LENGTH = 5.0;
 constexpr double UPDATE_RATE = 10.0;
