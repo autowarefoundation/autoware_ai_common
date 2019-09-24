@@ -164,6 +164,14 @@ void getContactingLanelets(const lanelet::LaneletMapPtr lanelet_map,
         max_distance = item.first;
       }
     }
+
+    // exit loop if all lanelets in the map intersects with the waypoint,
+    // e.g. when there is only one lanelet in the map.
+    if (actuallyNearestLanelets.size() < n)
+    {
+      break;
+    }
+
     n += increment;
   }
 
@@ -298,7 +306,8 @@ lanelet::LineString3d generateFineCenterline(const lanelet::ConstLanelet& lanele
 
 void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
                              const lanelet::routing::RoutingGraphPtr routing_graph,
-                             const autoware_msgs::LaneArray& lane_array, std::map<int, int>* waypointid2laneletid)
+                             const autoware_msgs::LaneArray& lane_array,
+                             std::map<int, lanelet::Id>* waypointid2laneletid)
 {
   if (!lanelet_map)
   {
