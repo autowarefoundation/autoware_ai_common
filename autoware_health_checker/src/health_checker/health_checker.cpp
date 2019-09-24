@@ -50,7 +50,7 @@ void HealthChecker::publishStatus() {
          key_itr++) {
       autoware_system_msgs::DiagnosticStatusArray diag_array;
       autoware_system_msgs::DiagnosticStatus diag;
-      diag.type = autoware_system_msgs::DiagnosticStatus::RATE_IS_SLOW;
+      diag.type = autoware_system_msgs::DiagnosticStatus::UNEXPECTED_RATE;
       std::pair<uint8_t, double> result =
           rate_checkers_[*key_itr]->getErrorLevelAndRate();
       diag.level = result.first;
@@ -210,7 +210,7 @@ void HealthChecker::CHECK_RATE(std::string key, double warn_rate,
         error_rate, fatal_rate, description));
     rate_checkers_[key] = std::move(checker_ptr);
   }
-  addNewBuffer(key, autoware_system_msgs::DiagnosticStatus::RATE_IS_SLOW,
+  addNewBuffer(key, autoware_system_msgs::DiagnosticStatus::UNEXPECTED_RATE,
                description);
   rate_checkers_[key]->check();
   return;
