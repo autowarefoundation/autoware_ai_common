@@ -23,7 +23,6 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${autoware_system_msgs_INCLUDE_DIRS}
 )
 
 set(HEALTH_CHECKER_SRC
@@ -35,27 +34,27 @@ add_library(health_checker
   ${HEALTH_CHECKER_SRC}
 )
 target_link_libraries(health_checker ${catkin_LIBRARIES})
-add_dependencies(health_checker ${catkin_EXPORTED_TARGETS} autoware_system_msgs_generate_messages_cpp)
+add_dependencies(health_checker ${catkin_EXPORTED_TARGETS})
 
 add_library(system_status_subscriber
   src/system_status_subscriber/system_status_subscriber.cpp
 )
 target_link_libraries(system_status_subscriber ${catkin_LIBRARIES})
-add_dependencies(system_status_subscriber ${catkin_EXPORTED_TARGETS} autoware_system_msgs_generate_messages_cpp)
+add_dependencies(system_status_subscriber ${catkin_EXPORTED_TARGETS})
 
 add_executable(health_aggregator
   src/health_aggregator/health_aggregator_node.cpp
   src/health_aggregator/health_aggregator.cpp
 )
 target_link_libraries(health_aggregator ${catkin_LIBRARIES})
-add_dependencies(health_aggregator ${catkin_EXPORTED_TARGETS} autoware_system_msgs_generate_messages_cpp)
+add_dependencies(health_aggregator ${catkin_EXPORTED_TARGETS})
 
 add_executable(health_analyzer
   src/health_analyzer/health_analyzer_node.cpp
   src/health_analyzer/health_analyzer.cpp
 )
 target_link_libraries(health_analyzer ${catkin_LIBRARIES})
-add_dependencies(health_analyzer ${catkin_EXPORTED_TARGETS} autoware_system_msgs_generate_messages_cpp)
+add_dependencies(health_analyzer ${catkin_EXPORTED_TARGETS})
 
 # CPP Execution programs
 set(CPP_EXEC_NAMES health_aggregator health_analyzer)
