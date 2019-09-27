@@ -37,7 +37,7 @@ namespace conversion
  * @param map [lanelet map data]
  * @param msg [converted ROS message. Only "data" field is filled]
  */
-void toBinMsg(const lanelet::LaneletMapPtr map, autoware_lanelet2_msgs::MapBin* msg);
+void toBinMsg(const lanelet::LaneletMapPtr& map, autoware_lanelet2_msgs::MapBin* msg);
 
 /**
  * [fromBinMsg converts ROS message into lanelet2 data. Similar implementation
@@ -45,7 +45,7 @@ void toBinMsg(const lanelet::LaneletMapPtr map, autoware_lanelet2_msgs::MapBin* 
  * @param msg [ROS message for lanelet map]
  * @param map [Converted lanelet2 data]
  */
-void fromBinMsg(const autoware_lanelet2_msgs::MapBin msg, lanelet::LaneletMapPtr map);
+void fromBinMsg(const autoware_lanelet2_msgs::MapBin& msg, lanelet::LaneletMapPtr map);
 
 /**
  * [toGeomMsgPt converts various point types to geometry_msgs point]

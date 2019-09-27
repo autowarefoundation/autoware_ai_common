@@ -40,7 +40,7 @@ namespace utils
 {
 namespace conversion
 {
-void toBinMsg(const lanelet::LaneletMapPtr map, autoware_lanelet2_msgs::MapBin* msg)
+void toBinMsg(const lanelet::LaneletMapPtr& map, autoware_lanelet2_msgs::MapBin* msg)
 {
   if (msg == nullptr)
   {
@@ -60,7 +60,7 @@ void toBinMsg(const lanelet::LaneletMapPtr map, autoware_lanelet2_msgs::MapBin* 
   msg->data.assign(data_str.begin(), data_str.end());
 }
 
-void fromBinMsg(const autoware_lanelet2_msgs::MapBin msg, lanelet::LaneletMapPtr map)
+void fromBinMsg(const autoware_lanelet2_msgs::MapBin& msg, lanelet::LaneletMapPtr map)
 {
   if (!map)
   {
