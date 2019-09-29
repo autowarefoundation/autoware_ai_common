@@ -55,7 +55,7 @@ void HealthChecker::publishStatus() {
           rate_checkers_[*key_itr]->getErrorLevelAndRate();
       diag.level = result.first;
       diag.key = *key_itr;
-      diag.value = doubeToJson(result.second);
+      diag.value = valueToJson(result.second);
       diag.description = rate_checkers_[*key_itr]->description;
       diag.header.stamp = now;
       diag_array.status.push_back(diag);
@@ -71,6 +71,34 @@ void HealthChecker::publishStatus() {
     rate.sleep();
   }
   return;
+}
+
+uint8_t HealthChecker::SET_DIAG_STATUS(autoware_system_msgs::DiagnosticStatus status) {
+  if (status.level == LEVEL_OK || status.level == LEVEL_WARN ||
+    status.level == LEVEL_ERROR || status.level == LEVEL_FATAL) {
+    addNewBuffer(status.key, status.type, status.description);
+    diag_buffers_[status.key]->addDiag(status);
+    return status.level;
+  } else {
+    return LEVEL_UNDEFINED;
+  }
+}
+
+uint8_t HealthChecker::CHECK_TRUE(std::string key, bool value,
+  uint8_t level, std::string description) {
+  if (level == LEVEL_OK || level == LEVEL_WARN ||
+    level == LEVEL_ERROR || level == LEVEL_FATAL) {
+    autoware_system_msgs::DiagnosticStatus status;
+    status.key = key;
+    status.value = valueToJson(value);
+    status.level = level;
+    status.header.stamp = ros::Time::now();
+    addNewBuffer(key, status.INVALID_VALUE, description);
+    diag_buffers_[status.key]->addDiag(status);
+    return level;
+  } else {
+    return LEVEL_UNDEFINED;
+  }
 }
 
 void HealthChecker::ENABLE() {
@@ -145,7 +173,7 @@ uint8_t HealthChecker::CHECK_MIN_VALUE(std::string key, double value,
     new_status.level = autoware_system_msgs::DiagnosticStatus::OK;
   }
   new_status.description = description;
-  new_status.value = doubeToJson(value);
+  new_status.value = valueToJson(value);
   new_status.header.stamp = ros::Time::now();
   diag_buffers_[key]->addDiag(new_status);
   return new_status.level;
@@ -170,7 +198,7 @@ uint8_t HealthChecker::CHECK_MAX_VALUE(std::string key, double value,
     new_status.level = autoware_system_msgs::DiagnosticStatus::OK;
   }
   new_status.description = description;
-  new_status.value = doubeToJson(value);
+  new_status.value = valueToJson(value);
   new_status.header.stamp = ros::Time::now();
   diag_buffers_[key]->addDiag(new_status);
   return new_status.level;
@@ -194,7 +222,7 @@ uint8_t HealthChecker::CHECK_RANGE(std::string key, double value,
   } else {
     new_status.level = autoware_system_msgs::DiagnosticStatus::OK;
   }
-  new_status.value = doubeToJson(value);
+  new_status.value = valueToJson(value);
   new_status.description = description;
   new_status.header.stamp = ros::Time::now();
   diag_buffers_[key]->addDiag(new_status);
@@ -214,14 +242,5 @@ void HealthChecker::CHECK_RATE(std::string key, double warn_rate,
                description);
   rate_checkers_[key]->check();
   return;
-}
-
-std::string HealthChecker::doubeToJson(double value) {
-  using namespace boost::property_tree;
-  std::stringstream ss;
-  ptree pt;
-  pt.put("value.double", value);
-  write_json(ss, pt);
-  return ss.str();
 }
 }

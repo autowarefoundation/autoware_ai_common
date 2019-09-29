@@ -84,6 +84,8 @@ public:
   }
   void CHECK_RATE(std::string key, double warn_rate, double error_rate,
                   double fatal_rate, std::string description);
+  uint8_t CHECK_TRUE(std::string key, bool value, uint8_t level, std::string description);
+  uint8_t SET_DIAG_STATUS(autoware_system_msgs::DiagnosticStatus);
   void NODE_ACTIVATE() {
     std::lock_guard<std::mutex> lock(mtx_);
     node_activated_ = true;
@@ -104,7 +106,14 @@ private:
   ros::Publisher status_pub_;
   bool keyExist(std::string key);
   bool addNewBuffer(std::string key, uint8_t type, std::string description);
-  std::string doubeToJson(double value);
+  template <typename T> std::string valueToJson(T value) {
+    using namespace boost::property_tree;
+    std::stringstream ss;
+    ptree pt;
+    pt.put("value", value);
+    write_json(ss, pt);
+    return ss.str();
+  }
   void publishStatus();
   bool node_activated_;
   std::mutex mtx_;
