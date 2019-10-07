@@ -27,6 +27,7 @@
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
 
 #include <vector>
+#include <string>
 
 namespace lanelet
 {
@@ -103,10 +104,12 @@ std::vector<lanelet::ConstLineString3d> stopLinesLanelet(const lanelet::ConstLan
 
 /**
  * [stopSignes extracts stoplines that are associated with stopsignes]
- * @param lanelets [input lanelets]
- * @return         [array of stoplines]
+ * @param lanelets     [input lanelets]
+ * @param stop_sign_id [sign id of stop sign]
+ * @return             [array of stoplines]
  */
-std::vector<lanelet::ConstLineString3d> stopSignStopLines(const lanelet::ConstLanelets lanelets);
+std::vector<lanelet::ConstLineString3d> stopSignStopLines(const lanelet::ConstLanelets lanelets,
+                                                          const std::string& stop_sign_id = "stop_sign");
 
 }  // namespace query
 }  // namespace utils

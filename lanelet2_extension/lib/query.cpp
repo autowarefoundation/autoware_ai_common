@@ -23,9 +23,9 @@
 #include <lanelet2_extension/utility/message_conversion.h>
 #include <lanelet2_extension/utility/query.h>
 
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 namespace lanelet
 {
@@ -217,7 +217,8 @@ std::vector<lanelet::ConstLineString3d> query::stopLinesLanelet(const lanelet::C
   return stoplines;
 }
 
-std::vector<lanelet::ConstLineString3d> query::stopSignStopLines(const lanelet::ConstLanelets lanelets)
+std::vector<lanelet::ConstLineString3d> query::stopSignStopLines(const lanelet::ConstLanelets lanelets,
+                                                                 const std::string& stop_sign_id)
 {
   std::vector<lanelet::ConstLineString3d> stoplines;
 
@@ -236,7 +237,7 @@ std::vector<lanelet::ConstLineString3d> query::stopSignStopLines(const lanelet::
       for (const auto& ts : traffic_sign_reg_elems)
       {
         // skip if traffic sign is not stop sign
-        if (ts->type() != "stop_sign")
+        if (ts->type() != stop_sign_id)
         {
           continue;
         }
