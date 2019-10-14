@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libwaypoint_follower)
 
+find_package(autoware_build_flags)
+
 find_package(catkin REQUIRED COMPONENTS
         roscpp
         std_msgs
         geometry_msgs
         autoware_msgs
-        autoware_build_flags
-        rostest
         rosunit
 )
 
@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES libwaypoint_follower
-        CATKIN_DEPENDS roscpp
+        CATKIN_DEPENDS
         std_msgs
         geometry_msgs
         autoware_msgs
@@ -35,7 +35,6 @@ SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 include_directories(libwaypoint_follower
         include
-        ${autoware_msgs_INCLUDE_DIRS}
         ${catkin_INCLUDE_DIRS}
 )
 

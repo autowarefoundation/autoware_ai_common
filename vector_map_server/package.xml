@@ -8,12 +8,10 @@
 
   <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>message_generation</build_depend>
 
   <depend>autoware_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>roscpp</depend>
   <depend>vector_map</depend>
   <depend>vector_map_msgs</depend>
   <depend>visualization_msgs</depend>
