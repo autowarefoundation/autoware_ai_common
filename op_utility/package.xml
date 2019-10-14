@@ -9,6 +9,8 @@
 
   <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>cmake_modules</buildtool_depend>
+  <test_depend>rostest</test_depend>
 
   <depend>tinyxml</depend>
   <depend>vector_map_msgs</depend>

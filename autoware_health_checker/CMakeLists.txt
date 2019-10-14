@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   diagnostic_msgs
   jsk_rviz_plugins
-  rostest
   rosunit
   rosgraph_msgs
 )
@@ -16,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES health_checker
-  CATKIN_DEPENDS autoware_system_msgs roscpp rosgraph_msgs
+  CATKIN_DEPENDS autoware_system_msgs rosgraph_msgs
 #  DEPENDS system_lib
 )
 
@@ -71,9 +70,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 # Install library
 install(TARGETS health_checker system_status_subscriber
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 if (CATKIN_ENABLE_TESTING)
