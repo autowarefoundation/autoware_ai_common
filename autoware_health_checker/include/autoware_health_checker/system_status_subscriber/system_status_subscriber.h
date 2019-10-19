@@ -38,17 +38,15 @@ public:
   ~SystemStatusSubscriber();
   void enable();
   void
-  addCallback(std::function<void(autoware_system_msgs::SystemStatus)> func);
+  addCallback(std::function<void(std::shared_ptr<autoware_system_msgs::SystemStatus>)> func);
 
 private:
   void
   systemStatusCallback(const autoware_system_msgs::SystemStatus::ConstPtr msg);
-  std::mutex mtx_;
   ros::Subscriber status_sub_;
   ros::NodeHandle nh_;
   ros::NodeHandle pnh_;
-  std::vector<std::function<void(autoware_system_msgs::SystemStatus)>>
-      functions_;
+  std::vector<std::function<void(std::shared_ptr<autoware_system_msgs::SystemStatus>)>> functions_;
 };
 }
 

@@ -1,0 +1,13 @@
+emergency_spdctl_max_dec: 1.0
+emergency_planner_enabled: false
+emergency_planner:
+  emergency_stop_planner: 0
+  semi-emergency_stop_planner: 1
+emergency_handling_priority:
+  node_error: 0
+  hardware_error: 0
+  emergency_handler_error: 0
+vital_monitor:
+  decision_maker:
+    timeout: 0.1
+    level: 4

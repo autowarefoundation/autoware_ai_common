@@ -1,0 +1,6 @@
+<launch>
+  <arg name="config_file" default="$(find emergency_handler)/test/test_emergency_handler.yaml" />
+  <test test-name="test-emergency_handler" pkg="emergency_handler" type="test_emergency_handler" name="test" clear_params="true">
+    <rosparam command="load" file="$(arg config_file)" />
+</test>
+</launch>
