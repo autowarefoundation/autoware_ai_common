@@ -39,6 +39,7 @@ constexpr uint8_t TYPE_RATE_IS_SLOW =
 
 constexpr double BUFFER_LENGTH = 5.0;
 constexpr double UPDATE_RATE = 10.0;
+constexpr double SYSTEM_UPDATE_RATE = 30.0;
 }
 
 #endif // CONSTANTS_H_INCLUDED
