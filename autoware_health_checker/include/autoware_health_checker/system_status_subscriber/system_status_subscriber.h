@@ -1,6 +1,3 @@
-#ifndef SYSTEM_STATUS_SUBSCRIBER_H_INCLUDED
-#define SYSTEM_STATUS_SUBSCRIBER_H_INCLUDED
-
 /*
  * Copyright 2019 Autoware Foundation. All rights reserved.
  *
@@ -20,6 +17,8 @@
  * v1.0 Masaya Kataoka
  */
 
+#ifndef AUTOWARE_HEALTH_CHECKER_SYSTEM_STATUS_SUBSCRIBER_SYSTEM_STATUS_SUBSCRIBER_H
+#define AUTOWARE_HEALTH_CHECKER_SYSTEM_STATUS_SUBSCRIBER_SYSTEM_STATUS_SUBSCRIBER_H
 // headers in Autoware
 #include <autoware_health_checker/constants.h>
 #include <autoware_system_msgs/SystemStatus.h>
@@ -30,12 +29,14 @@
 // headers in STL
 #include <functional>
 #include <mutex>
+#include <vector>
 
-namespace autoware_health_checker {
-class SystemStatusSubscriber {
+namespace autoware_health_checker
+{
+class SystemStatusSubscriber
+{
 public:
   SystemStatusSubscriber(ros::NodeHandle nh, ros::NodeHandle pnh);
-  ~SystemStatusSubscriber();
   void enable();
   void
   addCallback(std::function<void(std::shared_ptr<autoware_system_msgs::SystemStatus>)> func);
@@ -48,6 +49,6 @@ private:
   ros::NodeHandle pnh_;
   std::vector<std::function<void(std::shared_ptr<autoware_system_msgs::SystemStatus>)>> functions_;
 };
-}
+}  // namespace autoware_health_checker
 
-#endif // SYSTEM_STATUS_SUBSCRIBER_H_INCLUDED
+#endif  // AUTOWARE_HEALTH_CHECKER_SYSTEM_STATUS_SUBSCRIBER_SYSTEM_STATUS_SUBSCRIBER_H

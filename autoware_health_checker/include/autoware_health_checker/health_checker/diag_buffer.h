@@ -1,6 +1,3 @@
-#ifndef DIAG_BUFFER_H_INCLUDED
-#define DIAG_BUFFER_H_INCLUDED
-
 /*
  * Copyright 2019 Autoware Foundation. All rights reserved.
  *
@@ -20,6 +17,8 @@
  * v1.0 Masaya Kataoka
  */
 
+#ifndef AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_DIAG_BUFFER_H
+#define AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_DIAG_BUFFER_H
 // headers in Autoare
 #include <autoware_health_checker/constants.h>
 #include <autoware_system_msgs/DiagnosticStatusArray.h>
@@ -33,30 +32,32 @@
 // headers in ROS
 #include <ros/ros.h>
 
-namespace autoware_health_checker {
-class DiagBuffer {
+namespace autoware_health_checker
+{
+class DiagBuffer
+{
 public:
-  DiagBuffer(std::string key, uint8_t type, std::string description,
-             double buffer_length);
-  ~DiagBuffer();
+  DiagBuffer(ErrorKey key, ErrorType type, std::string description,
+             double buffer_duration);
   void addDiag(autoware_system_msgs::DiagnosticStatus status);
   autoware_system_msgs::DiagnosticStatusArray getAndClearData();
-  const uint8_t type;
+  const ErrorType type;
   const std::string description;
 
 private:
+  using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
   std::mutex mtx_;
-  uint8_t getErrorLevel();
+  ErrorLevel getErrorLevel();
   void updateBuffer();
-  std::string key_;
-  ros::Duration buffer_length_;
-  std::map<uint8_t, autoware_system_msgs::DiagnosticStatusArray> buffer_;
-  autoware_system_msgs::DiagnosticStatusArray filterBuffer(ros::Time now,
-                                                           uint8_t level);
+  ErrorKey key_;
+  ros::Duration buffer_duration_;
+  std::map<ErrorLevel, autoware_system_msgs::DiagnosticStatusArray> buffer_;
+  autoware_system_msgs::DiagnosticStatusArray filterBuffer(
+    ros::Time now, ErrorLevel level);
   ros::Publisher status_pub_;
   bool isOlderTimestamp(const autoware_system_msgs::DiagnosticStatus &a,
                         const autoware_system_msgs::DiagnosticStatus &b);
 };
-}
+}  // namespace autoware_health_checker
 
-#endif // DIAG_BUFFER_H_INCLUDED
+#endif  // AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_DIAG_BUFFER_H

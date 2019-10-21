@@ -21,7 +21,8 @@
 
 #include <autoware_health_checker/health_analyzer/health_analyzer.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   ros::init(argc, argv, "health_analyzer");
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");

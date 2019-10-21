@@ -1,6 +1,3 @@
-#ifndef CONSTANTS_H_INCLUDED
-#define CONSTANTS_H_INCLUDED
-
 /*
  * Copyright 2019 Autoware Foundation. All rights reserved.
  *
@@ -20,26 +17,42 @@
  * v1.0 Masaya Kataoka
  */
 
+#ifndef AUTOWARE_HEALTH_CHECKER_CONSTANTS_H
+#define AUTOWARE_HEALTH_CHECKER_CONSTANTS_H
+
+#include <string>
 #include <autoware_system_msgs/DiagnosticStatus.h>
 
-namespace autoware_health_checker {
-constexpr uint8_t LEVEL_UNDEFINED =
-    autoware_system_msgs::DiagnosticStatus::UNDEFINED;
-constexpr uint8_t LEVEL_OK = autoware_system_msgs::DiagnosticStatus::OK;
-constexpr uint8_t LEVEL_WARN = autoware_system_msgs::DiagnosticStatus::WARN;
-constexpr uint8_t LEVEL_ERROR = autoware_system_msgs::DiagnosticStatus::ERROR;
-constexpr uint8_t LEVEL_FATAL = autoware_system_msgs::DiagnosticStatus::FATAL;
+namespace autoware_health_checker
+{
+/**
+ * \brief ErrorLevel means the seriousness of abnormalities.
+ * This value is managed by autoware_system_msgs::DiagnosticStatus.
+ */
+using ErrorLevel = uint8_t;
 
-constexpr uint8_t TYPE_UNDEFINED =
-    autoware_system_msgs::DiagnosticStatus::UNDEFINED;
-constexpr uint8_t TYPE_OUT_OF_RANGE =
-    autoware_system_msgs::DiagnosticStatus::OUT_OF_RANGE;
-constexpr uint8_t TYPE_RATE_IS_SLOW =
-    autoware_system_msgs::DiagnosticStatus::UNEXPECTED_RATE;
+/**
+ * \brief ErrorType means the type of abnormalities.
+ * This value is managed by autoware_system_msgs::DiagnosticStatus.
+ */
+using ErrorType = uint8_t;
 
-constexpr double BUFFER_LENGTH = 5.0;
+/**
+ * \brief ErrorKey uniquely identifies each self-monitoring target
+ * for parameter management and troubleshooting.
+ * e.g. "topic_rate_***_slow", "value_***_high", etc.
+ */
+using ErrorKey = std::string;
+
+/**
+ * \brief ThresholdType represents the threshold type
+ * of the self-monitoring target.
+ * e.g. "min", "max", and "range".
+ */
+using ThreshType = std::string;
+constexpr double BUFFER_DURATION = 5.0;
 constexpr double UPDATE_RATE = 10.0;
 constexpr double SYSTEM_UPDATE_RATE = 30.0;
-}
+}  // namespace autoware_health_checker
 
-#endif // CONSTANTS_H_INCLUDED
+#endif  // AUTOWARE_HEALTH_CHECKER_CONSTANTS_H
