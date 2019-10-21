@@ -17,49 +17,43 @@
  * v1.0 Masaya Kataoka
  */
 
-#ifndef AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_RATE_CHECKER_H
-#define AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_RATE_CHECKER_H
+#ifndef AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_VALUE_MANAGER_H
+#define AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_VALUE_MANAGER_H
+
 // headers in ROS
 #include <ros/ros.h>
 
+// headers in Autoware
+#include <autoware_health_checker/constants.h>
+#include <autoware_health_checker/health_checker/param_manager.h>
+
 // headers in STL
+#include <map>
 #include <mutex>
-#include <vector>
 #include <string>
 #include <utility>
 
 // headers in Boost
 #include <boost/optional.hpp>
-
-// headers in Autoware
-#include <autoware_health_checker/constants.h>
-
 namespace autoware_health_checker
 {
-using LevelRatePair = std::pair<ErrorLevel, double>;
-
-class RateChecker
+class ValueManager : public ParamManager
 {
 public:
-  RateChecker(double buffer_duration, double warn_rate, double error_rate,
-              double fatal_rate, std::string description);
-  void check();
-  boost::optional<LevelRatePair> getErrorLevelAndRate();
-  boost::optional<ErrorLevel> getErrorLevel();
-  boost::optional<double> getRate();
-  void setRate(double warn_rate, double error_rate, double fatal_rate);
-  const std::string description;
+  using ErrorCategory = std::pair<ErrorKey, ThreshType>;
+  using ErrorSummary = std::pair<ErrorCategory, ErrorLevel>;
+
+  ValueManager(ros::NodeHandle nh, ros::NodeHandle pnh);
+  void setDefaultValue(
+    const ErrorKey& key, const ThreshType& thresh_type, const double warn_value,
+    const double error_value, const double fatal_value);
+  boost::optional<double> getValue(const ErrorKey& key,
+    const ThreshType& thresh_type, const ErrorLevel level);
+  bool isEmpty(const ErrorKey& key) const;
 
 private:
   using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
-  ros::Time start_time_;
-  void update();
-  std::vector<ros::Time> data_;
-  double buffer_duration_;
-  double warn_rate_;
-  double error_rate_;
-  double fatal_rate_;
-  std::mutex mtx_;
+  std::map<ErrorSummary, double> error_details_;
 };
 }  // namespace autoware_health_checker
-#endif  // AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_RATE_CHECKER_H
+#endif  // AUTOWARE_HEALTH_CHECKER_HEALTH_CHECKER_VALUE_MANAGER_H

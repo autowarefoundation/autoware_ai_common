@@ -17,83 +17,87 @@
  * v1.0 Masaya Kataoka
  */
 
+#include <string>
+#include <vector>
 #include <autoware_health_checker/health_checker/rate_checker.h>
 
-namespace autoware_health_checker {
-RateChecker::RateChecker(double buffer_length, double warn_rate,
-                         double error_rate, double fatal_rate,
-                         std::string description)
-    : buffer_length_(buffer_length), warn_rate_(warn_rate),
-      error_rate_(error_rate), fatal_rate_(fatal_rate),
-      description(description) {
-  start_time_ = ros::Time::now();
+namespace autoware_health_checker
+{
+RateChecker::RateChecker(
+  double buffer_duration, double warn_rate, double error_rate,
+  double fatal_rate, std::string description)
+  : buffer_duration_(buffer_duration), warn_rate_(warn_rate),
+    error_rate_(error_rate), fatal_rate_(fatal_rate),
+    description(description), start_time_(ros::Time::now()) {}
+
+boost::optional<LevelRatePair> RateChecker::getErrorLevelAndRate()
+{
+  const auto rate = getRate();
+  if (!rate)
+  {
+    return boost::none;
+  }
+  const ErrorLevel level =
+    (rate.get() < fatal_rate_) ? AwDiagStatus::FATAL :
+    (rate.get() < error_rate_) ? AwDiagStatus::ERROR :
+    (rate.get() < warn_rate_) ? AwDiagStatus::WARN :
+    AwDiagStatus::OK;
+  return std::make_pair(level, rate.get());
 }
 
-RateChecker::~RateChecker() {}
-
-std::pair<uint8_t, double> RateChecker::getErrorLevelAndRate() {
-  std::pair<uint8_t, double> ret;
-  boost::optional<double> rate = getRate();
-  if (!rate) {
-    ret = std::make_pair(autoware_health_checker::LEVEL_ERROR, 0);
-  } else if (rate.get() < fatal_rate_) {
-    ret = std::make_pair(autoware_health_checker::LEVEL_FATAL, rate.get());
-  } else if (rate.get() < error_rate_) {
-    ret = std::make_pair(autoware_health_checker::LEVEL_ERROR, rate.get());
-  } else if (rate.get() < warn_rate_) {
-    ret = std::make_pair(autoware_health_checker::LEVEL_WARN, rate.get());
-  } else {
-    ret = std::make_pair(autoware_health_checker::LEVEL_OK, rate.get());
+boost::optional<ErrorLevel> RateChecker::getErrorLevel()
+{
+  auto level_and_rate = getErrorLevelAndRate();
+  if (!level_and_rate)
+  {
+    return boost::none;
   }
-  return ret;
+  return level_and_rate.get().first;
 }
 
-uint8_t RateChecker::getErrorLevel() {
-  boost::optional<double> rate = getRate();
-  if (!rate) {
-    return autoware_health_checker::LEVEL_ERROR;
-  }
-  if (rate.get() < fatal_rate_) {
-    return autoware_health_checker::LEVEL_FATAL;
-  }
-  if (rate.get() < error_rate_) {
-    return autoware_health_checker::LEVEL_ERROR;
-  }
-  if (rate.get() < warn_rate_) {
-    return autoware_health_checker::LEVEL_WARN;
-  }
-  return autoware_health_checker::LEVEL_OK;
-}
-
-void RateChecker::check() {
+void RateChecker::setRate(
+  double warn_rate, double error_rate, double fatal_rate)
+{
   update();
-  mtx_.lock();
-  data_.push_back(ros::Time::now());
-  mtx_.unlock();
-}
-
-void RateChecker::update() {
-  mtx_.lock();
-  std::vector<ros::Time> buffer;
-  for (auto data_itr = data_.begin(); data_itr != data_.end(); data_itr++) {
-    if (*data_itr > ros::Time::now() - ros::Duration(buffer_length_)) {
-      buffer.push_back(*data_itr);
-    }
-  }
-  data_ = buffer;
-  mtx_.unlock();
+  std::lock_guard<std::mutex> lock(mtx_);
+  warn_rate_ = warn_rate;
+  error_rate_ = error_rate;
+  fatal_rate_ = fatal_rate;
   return;
 }
 
-boost::optional<double> RateChecker::getRate() {
+void RateChecker::check()
+{
+  update();
+  std::lock_guard<std::mutex> lock(mtx_);
+  data_.push_back(ros::Time::now());
+}
+
+void RateChecker::update()
+{
+  std::lock_guard<std::mutex> lock(mtx_);
+  std::vector<ros::Time> buffer;
+  for (const auto& el : data_)
+  {
+    if (el > ros::Time::now() - ros::Duration(buffer_duration_))
+    {
+      buffer.push_back(el);
+    }
+  }
+  data_ = buffer;
+  return;
+}
+
+boost::optional<double> RateChecker::getRate()
+{
   boost::optional<double> rate;
-  if (ros::Time::now() - start_time_ < ros::Duration(buffer_length_)) {
+  if (ros::Time::now() - start_time_ < ros::Duration(buffer_duration_))
+  {
     return boost::none;
   }
   update();
-  mtx_.lock();
-  rate = data_.size() / buffer_length_;
-  mtx_.unlock();
+  std::lock_guard<std::mutex> lock(mtx_);
+  rate = data_.size() / buffer_duration_;
   return rate;
 }
-}
+}  // namespace autoware_health_checker
