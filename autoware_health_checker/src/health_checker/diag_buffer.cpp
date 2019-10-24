@@ -35,9 +35,8 @@ DiagBuffer::DiagBuffer(ErrorKey key, ErrorType type,
 void DiagBuffer::addDiag(autoware_system_msgs::DiagnosticStatus status)
 {
   std::lock_guard<std::mutex> lock(mtx_);
-  buffer_.at(status.level).status.emplace_back(status);
+  buffer_[status.level].status.emplace_back(status);
   updateBuffer();
-  return;
 }
 
 autoware_system_msgs::DiagnosticStatusArray DiagBuffer::getAndClearData()
@@ -50,6 +49,7 @@ autoware_system_msgs::DiagnosticStatusArray DiagBuffer::getAndClearData()
     AwDiagStatus::UNDEFINED
   };
   std::lock_guard<std::mutex> lock(mtx_);
+  updateBuffer();
   auto data = buffer_.at(AwDiagStatus::FATAL);
   auto& status = data.status;
   for (const auto& level : level_array)
@@ -99,7 +99,7 @@ DiagBuffer::filterBuffer(ros::Time now, ErrorLevel level)
   {
     if (data.header.stamp > (now - buffer_duration_))
     {
-      ret.status.push_back(data);
+      ret.status.emplace_back(data);
     }
   }
   return ret;
@@ -120,7 +120,6 @@ void DiagBuffer::updateBuffer()
   {
     buffer_[level] = filterBuffer(now, level);
   }
-  return;
 }
 
 bool DiagBuffer::isOlderTimestamp(

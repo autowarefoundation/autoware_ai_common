@@ -54,15 +54,15 @@ void HealthChecker::publishStatus(const ros::TimerEvent& event)
       diag.header.stamp = now;
       diag.level = result->first;
       diag.type = AwDiagStatus::UNEXPECTED_RATE;
-      diag_array.status.push_back(diag);
-      status.status.push_back(diag_array);
+      diag_array.status.emplace_back(diag);
+      status.status.emplace_back(diag_array);
     }
   }
   // iterate Diagnostic Buffer and publish all diagnostic data
   const auto keys = getKeys();
   for (const auto& key : keys)
   {
-    status.status.push_back(diag_buffers_[key]->getAndClearData());
+    status.status.emplace_back(diag_buffers_[key]->getAndClearData());
   }
   status_pub_.publish(status);
 }
@@ -85,6 +85,7 @@ ErrorLevel HealthChecker::SET_DIAG_STATUS(
     return AwDiagStatus::UNDEFINED;
   }
   addNewBuffer(status.key, status.type, status.description);
+  diag_buffers_[status.key]->addDiag(status);
   return status.level;
 }
 
@@ -105,7 +106,8 @@ ErrorLevel HealthChecker::CHECK_TRUE(
 
 void HealthChecker::ENABLE()
 {
-  ros::Duration duration(1.0 / autoware_health_checker::UPDATE_RATE);
+  ros::Duration duration(
+    1.0 / autoware_health_checker::NODE_STATUS_UPDATE_RATE);
   timer_ = nh_.createTimer(duration, &HealthChecker::publishStatus, this);
 }
 
@@ -118,7 +120,7 @@ std::vector<ErrorKey> HealthChecker::getKeys()
     const auto res = std::find(checked.begin(), checked.end(), buf.first);
     if (res == checked.end())
     {
-      keys.push_back(buf.first);
+      keys.emplace_back(buf.first);
     }
   }
   return keys;
@@ -129,7 +131,7 @@ std::vector<ErrorKey> HealthChecker::getRateCheckerKeys()
   std::vector<ErrorKey> keys;
   for (const auto& checker : rate_checkers_)
   {
-    keys.push_back(checker.first);
+    keys.emplace_back(checker.first);
   }
   return keys;
 }
@@ -253,7 +255,6 @@ void HealthChecker::CHECK_RATE(const ErrorKey& key,
     value_manager_.getValue(key, "rate", AwDiagStatus::FATAL).get());
   rate_checkers_[key]->check();
   addNewBuffer(key, AwDiagStatus::UNEXPECTED_RATE, description);
-  return;
 }
 
 template <typename T>

@@ -39,13 +39,11 @@ void SystemStatusSubscriber::systemStatusCallback(
     auto pmsg = std::make_shared<autoware_system_msgs::SystemStatus>(*msg);
     func(pmsg);
   }
-  return;
 }
 
 void SystemStatusSubscriber::addCallback(
   std::function<void(std::shared_ptr<autoware_system_msgs::SystemStatus>)> func)
 {
-  functions_.push_back(func);
-  return;
+  functions_.emplace_back(func);
 }
 }  // namespace autoware_health_checker

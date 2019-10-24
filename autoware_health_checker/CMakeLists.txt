@@ -50,6 +50,7 @@ add_dependencies(system_status_subscriber ${catkin_EXPORTED_TARGETS})
 add_executable(health_aggregator
   src/health_aggregator/health_aggregator_node.cpp
   src/health_aggregator/health_aggregator.cpp
+  src/health_aggregator/status_monitor.cpp
 )
 target_link_libraries(health_aggregator health_checker ${catkin_LIBRARIES})
 add_dependencies(health_aggregator ${catkin_EXPORTED_TARGETS})

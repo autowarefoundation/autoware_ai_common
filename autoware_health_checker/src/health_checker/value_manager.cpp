@@ -32,7 +32,6 @@ void ValueManager::setDefaultValue(
   error_details_[std::make_pair(category, AwDiagStatus::WARN)] = warn_value;
   error_details_[std::make_pair(category, AwDiagStatus::ERROR)] = error_value;
   error_details_[std::make_pair(category, AwDiagStatus::FATAL)] = fatal_value;
-  return;
 }
 
 boost::optional<double> ValueManager::getValue(const ErrorKey& key,
