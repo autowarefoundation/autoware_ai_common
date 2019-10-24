@@ -92,12 +92,12 @@ std::vector<std::string> HealthAnalyzer::findWarningNodes(
         }
         else if (isOverWarn(status.level))
         {
-          ret.push_back(node_status.node_name);
+          ret.emplace_back(node_status.node_name);
         }
       }
     }
   }
-  return std::move(ret);
+  return ret;
 }
 
 std::vector<std::string> HealthAnalyzer::findErrorNodes(
@@ -123,12 +123,12 @@ std::vector<std::string> HealthAnalyzer::findErrorNodes(
         }
         if (isAlreadyExist(sys_status.available_nodes, node_name))
         {
-          ret.push_back(node_name);
+          ret.emplace_back(node_name);
         }
       }
     }
   }
-  return std::move(ret);
+  return ret;
 }
 
 std::vector<std::string> HealthAnalyzer::findRootNodes(
@@ -155,10 +155,10 @@ std::vector<std::string> HealthAnalyzer::findRootNodes(
     }
     if (!depend_found)
     {
-      ret.push_back(node);
+      ret.emplace_back(node);
     }
   }
-  return std::move(ret);
+  return ret;
 }
 
 autoware_system_msgs::SystemStatus HealthAnalyzer::filterSystemStatus(
@@ -174,7 +174,7 @@ autoware_system_msgs::SystemStatus HealthAnalyzer::filterSystemStatus(
   {
     if (isAlreadyExist(root_nodes, node_status.node_name))
     {
-      filtered_status.node_status.push_back(node_status);
+      filtered_status.node_status.emplace_back(node_status);
     }
   }
   return filtered_status;
@@ -185,7 +185,6 @@ void HealthAnalyzer::systemStatusCallback(
 {
   generateDependGraph(*msg);
   system_status_summary_pub_.publish(filterSystemStatus(*msg));
-  return;
 }
 
 void HealthAnalyzer::generateDependGraph(
@@ -196,7 +195,6 @@ void HealthAnalyzer::generateDependGraph(
   {
     addDepend(el);
   }
-  return;
 }
 
 void HealthAnalyzer::writeDot()
@@ -206,7 +204,6 @@ void HealthAnalyzer::writeDot()
   std::ofstream f(path.c_str());
   boost::write_graphviz(f, depend_graph_,
     boost::make_label_writer(get(&node_property::node_name, depend_graph_)));
-  return;
 }
 
 boost::optional<HealthAnalyzer::vertex_t>
@@ -254,5 +251,4 @@ void HealthAnalyzer::addDepend(
     boost::add_edge(sub_vertex.get(), pub_vertex.get(), depend_graph_);
   depend_graph_[topic].node_sub = statistics.node_sub;
   depend_graph_[topic].node_pub = statistics.node_pub;
-  return;
 }

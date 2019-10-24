@@ -63,14 +63,13 @@ void RateChecker::setRate(
   warn_rate_ = warn_rate;
   error_rate_ = error_rate;
   fatal_rate_ = fatal_rate;
-  return;
 }
 
 void RateChecker::check()
 {
   update();
   std::lock_guard<std::mutex> lock(mtx_);
-  data_.push_back(ros::Time::now());
+  data_.emplace_back(ros::Time::now());
 }
 
 void RateChecker::update()
@@ -81,11 +80,10 @@ void RateChecker::update()
   {
     if (el > ros::Time::now() - ros::Duration(buffer_duration_))
     {
-      buffer.push_back(el);
+      buffer.emplace_back(el);
     }
   }
   data_ = buffer;
-  return;
 }
 
 boost::optional<double> RateChecker::getRate()

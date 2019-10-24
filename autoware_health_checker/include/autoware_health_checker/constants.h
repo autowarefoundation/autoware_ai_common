@@ -50,8 +50,8 @@ using ErrorKey = std::string;
  * e.g. "min", "max", and "range".
  */
 using ThreshType = std::string;
-constexpr double BUFFER_DURATION = 5.0;
-constexpr double UPDATE_RATE = 10.0;
+constexpr double BUFFER_DURATION = 0.5;
+constexpr double NODE_STATUS_UPDATE_RATE = 10.0;
 constexpr double SYSTEM_UPDATE_RATE = 30.0;
 }  // namespace autoware_health_checker
 

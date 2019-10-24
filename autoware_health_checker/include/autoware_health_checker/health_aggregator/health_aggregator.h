@@ -27,6 +27,7 @@
 // headers in Autoware
 #include <autoware_health_checker/constants.h>
 #include <autoware_health_checker/health_checker/param_manager.h>
+#include <autoware_health_checker/health_aggregator/status_monitor.h>
 #include <autoware_system_msgs/NodeStatus.h>
 #include <autoware_system_msgs/SystemStatus.h>
 
@@ -51,6 +52,7 @@ public:
 
 private:
   using AwHwStatus = autoware_system_msgs::HardwareStatus;
+  using AwHwStatusArray = std::vector<AwHwStatus>;
   using AwNodeStatus = autoware_system_msgs::NodeStatus;
   using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
   using AwDiagStatusArray = autoware_system_msgs::DiagnosticStatusArray;
@@ -66,22 +68,24 @@ private:
   std::map<ErrorLevel, ros::Publisher> text_pub_;
   ros::Subscriber node_status_sub_;
   ros::Subscriber diagnostic_array_sub_;
-  ros::Timer timer_;
+  ros::Timer system_status_timer_, vital_timer_;
+  std::vector<std::string> detected_nodes_;
+  StatusMonitor status_monitor_;
+  void updateNodeStatus(const autoware_system_msgs::NodeStatus& node_status);
   void publishSystemStatus(const ros::TimerEvent& event);
-  void nodeStatusCallback(const AwNodeStatus::ConstPtr msg);
-  void diagnosticArrayCallback(const RosDiagArr::ConstPtr msg);
-  std::string generateText(std::vector<AwDiagStatus> status);
+  void nodeStatusCallback(const AwNodeStatus::ConstPtr& msg);
+  void diagnosticArrayCallback(const RosDiagArr::ConstPtr& msg);
+  std::string generateText(const std::vector<AwDiagStatus>& status);
   jsk_rviz_plugins::OverlayText
-    generateOverlayText(AwSysStatus status, ErrorLevel level);
+    generateOverlayText(const AwSysStatus& status, const ErrorLevel level);
   std::vector<AwDiagStatus>
-    filterNodeStatus(AwSysStatus status, ErrorLevel level);
-  boost::optional<AwHwStatus> convert(const RosDiagArr::ConstPtr msg);
+    filterNodeStatus(const AwSysStatus& status, const ErrorLevel level);
+  boost::optional<AwHwStatusArray> convert(const RosDiagArr::ConstPtr& msg);
   AwSysStatus system_status_;
   autoware_health_checker::ParamManager param_manager_;
   std::mutex mtx_;
-  void updateConnectionStatus();
-  // key topic_name,publisher_node,subscriber_node
-  std::map<std::array<std::string, 3>, rosgraph_msgs::TopicStatistics>
-      topic_status_;
+  void updateConnectionStatus(const ros::TimerEvent& event);
+  double hardware_diag_rate_;
+  std::string hardware_diag_node_;
 };
 #endif  // AUTOWARE_HEALTH_CHECKER_HEALTH_AGGREGATOR_HEALTH_AGGREGATOR_H
