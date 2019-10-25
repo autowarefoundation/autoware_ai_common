@@ -21,4 +21,5 @@
   <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>vector_map</depend>
+  <depend>lanelet2_extension</depend>
 </package>
