@@ -10,7 +10,7 @@
   <arg name="grid_position_z" default="-2" />
 
   <!-- Launch node -->
-  <node pkg="object_map" type="wayarea2grid" name="wayarea2grid" output="screen">
+  <node pkg="object_map" type="wayarea2grid_lanelet2" name="wayarea2grid_lanelet2" output="screen">
     <param name="sensor_frame" value="$(arg sensor_frame)" />
     <param name="grid_frame" value="$(arg grid_frame)" />
     <param name="grid_resolution" value="$(arg grid_resolution)" />

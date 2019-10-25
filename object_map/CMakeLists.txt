@@ -6,6 +6,7 @@ find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslint
   pcl_ros
   pcl_conversions
   tf
@@ -16,7 +17,17 @@ find_package(catkin REQUIRED COMPONENTS
   grid_map_msgs
   autoware_msgs
   vector_map
+  lanelet2_extension
 )
+
+# TODO add other files into roslint
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
+roslint_cpp(
+  nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2_node.cpp
+  nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2.cpp
+  include/wayarea2grid_lanelet2/wayarea2grid_lanelet2.h
+)
+
 
 find_package(Qt5Core REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -40,6 +51,7 @@ catkin_package(
   autoware_msgs
   grid_map_msgs
   vector_map
+  lanelet2_extension
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
@@ -118,10 +130,30 @@ target_link_libraries(wayarea2grid
   ${catkin_LIBRARIES}
   wayarea2grid_lib
 )
+      
+add_library(wayarea2grid_lanelet2_lib
+        include/object_map/object_map_utils.hpp
+        nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2.cpp
+        )
+target_link_libraries(wayarea2grid_lanelet2_lib
+        ${catkin_LIBRARIES}
+        object_map_utils_lib
+        )
+
+add_executable(wayarea2grid_lanelet2
+        nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2_node.cpp
+        )
+
+target_link_libraries(wayarea2grid_lanelet2
+        ${catkin_LIBRARIES}
+        wayarea2grid_lanelet2_lib
+        )
 
 install(TARGETS
   wayarea2grid
   wayarea2grid_lib
+  wayarea2grid_lanelet2
+  wayarea2grid_lanelet2_lib
   grid_map_filter_lib
   grid_map_filter
   potential_field
@@ -144,3 +176,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
 )
+
+if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()
