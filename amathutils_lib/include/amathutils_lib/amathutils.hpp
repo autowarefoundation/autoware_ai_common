@@ -49,6 +49,9 @@ inline double getTimefromAcceleration(double _v0, double _v, double _a)
   return (_v - _v0) / _a;
 }
 
+bool getIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double* intersect_x, double* intersect_y );
+bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3, geometry_msgs::Point p4, geometry_msgs::Point* intersect);
+
 geometry_msgs::Point getNearPtOnLine(const geometry_msgs::Point &_p, const geometry_msgs::Point &_a,
                                      const geometry_msgs::Point &_b);
 double find_distance(const geometry_msgs::Point &_from, const geometry_msgs::Point &_to);
