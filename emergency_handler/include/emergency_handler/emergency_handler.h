@@ -34,14 +34,13 @@ struct EmergencyHandlingPriority
   unsigned int emergency_handler_error;
   unsigned int no_error;
 
-  EmergencyHandlingPriority() :
-  node_error(0), hardware_error(0), emergency_handler_error(0), no_error(INT_MAX) {}
+  EmergencyHandlingPriority() : node_error(0), hardware_error(0), emergency_handler_error(0), no_error(INT_MAX) {}
 };
 
 class EmergencyHandler
 {
 public:
-  EmergencyHandler(const ros::NodeHandle &nh, const ros::NodeHandle &pnh);
+  EmergencyHandler(const ros::NodeHandle& nh, const ros::NodeHandle& pnh);
 
   void registerEmergencyPlanners(void);
   void addFilter(const SystemStatusFilter& filter);

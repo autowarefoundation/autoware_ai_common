@@ -50,6 +50,7 @@ class SystemStatusFilter
 {
 public:
   SystemStatusFilter();
+
   virtual int selectPriority(std::shared_ptr<SystemStatus> const status);
   static const DiagnosticStatusArray& getFactorStatusArray();
   static void resetFactorStatusArray();
@@ -74,6 +75,5 @@ protected:
 private:
   static std::mutex factor_status_mutex_;
 };
-
 
 #endif  // EMERGENCY_HANDLER_LIBSYSTEM_STATUS_FILTER_H

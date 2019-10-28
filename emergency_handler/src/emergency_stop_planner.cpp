@@ -19,8 +19,8 @@
 #include <algorithm>
 #include <emergency_handler/emergency_stop_planner.h>
 
-SemiEmergencyStopPlanner::SemiEmergencyStopPlanner(const std::pair<std::string, int> param, double max_dec) :
-EmergencyPlanner(param, max_dec)
+SemiEmergencyStopPlanner::SemiEmergencyStopPlanner(const std::pair<std::string, int> param, double max_dec)
+  : EmergencyPlanner(param, max_dec)
 {
 }
 
@@ -29,12 +29,12 @@ void SemiEmergencyStopPlanner::get_feedback_from_emergency_planner(EmergencyPlan
   epf->is_vehicle_cmd_updated = true;
   epf->vehicle_cmd.header.stamp = ros::Time::now();
   epf->vehicle_cmd.ctrl_cmd.linear_velocity =
-  std::max(epf->vehicle_cmd.ctrl_cmd.linear_velocity - max_dec_for_spdctl_, 0.0);
+      std::max(epf->vehicle_cmd.ctrl_cmd.linear_velocity - max_dec_for_spdctl_, 0.0);
   epf->vehicle_cmd.emergency = (epf->vehicle_cmd.ctrl_cmd.linear_velocity == 0.0) ? 1 : 0;
 }
 
-EmergencyStopPlanner::EmergencyStopPlanner(const std::pair<std::string, int> param, double max_dec) :
-EmergencyPlanner(param, max_dec)
+EmergencyStopPlanner::EmergencyStopPlanner(const std::pair<std::string, int> param, double max_dec)
+  : EmergencyPlanner(param, max_dec)
 {
 }
 

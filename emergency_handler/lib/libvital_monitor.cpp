@@ -39,6 +39,7 @@ void VitalMonitor::updateNodeStatus(const std::vector<std::string>& available_no
       dead_nodes_.erase(node);
     }
   }
+
   for (auto& node : required_nodes_)
   {
     const std::string node_name = node.first;
@@ -47,7 +48,12 @@ void VitalMonitor::updateNodeStatus(const std::vector<std::string>& available_no
     {
       node.second.spend(diff);
     }
+    else
+    {
+      node.second.activate();
+    }
   }
+
   for (const auto& node : required_nodes_)
   {
     const std::string node_name = node.first;
@@ -74,8 +80,9 @@ void VitalMonitor::initMonitoredNodeList(const ros::NodeHandle& pnh)
   dead_nodes_.clear();
 }
 
-autoware_system_msgs::DiagnosticStatusArray
-  VitalMonitor::createDiagnosticStatusArray(std::string dead_node_name, std_msgs::Header* const header, int level) const
+autoware_system_msgs::DiagnosticStatusArray VitalMonitor::createDiagnosticStatusArray(std::string dead_node_name,
+                                                                                      std_msgs::Header* const header,
+                                                                                      int level) const
 {
   autoware_system_msgs::DiagnosticStatus ds;
   std::string name(dead_node_name);
@@ -93,8 +100,8 @@ autoware_system_msgs::DiagnosticStatusArray
   return array;
 }
 
-autoware_system_msgs::NodeStatus
-  VitalMonitor::createNodeStatus(std::string dead_node_name, std_msgs::Header* const header, int level) const
+autoware_system_msgs::NodeStatus VitalMonitor::createNodeStatus(std::string dead_node_name,
+                                                                std_msgs::Header* const header, int level) const
 {
   autoware_system_msgs::NodeStatus ns;
   ns.header = *header;
@@ -112,7 +119,7 @@ void VitalMonitor::addDeadNodes(std::shared_ptr<autoware_system_msgs::SystemStat
     const int level = node.second;
     auto& array = status->node_status;
     auto found = std::find_if(array.begin(), array.end(),
-      [&](autoware_system_msgs::NodeStatus& stat){return (name == stat.node_name);});  // NOLINT
+    [&](autoware_system_msgs::NodeStatus& stat) {return (name == stat.node_name);});  // NOLINT
     if (found == array.end())
     {
       array.emplace_back(createNodeStatus(name, &status->header, level));

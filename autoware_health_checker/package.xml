@@ -15,5 +15,6 @@
   <depend>roscpp</depend>
   <depend>rosgraph_msgs</depend>
   <depend>rosunit</depend>
+  <depend>ros_observer</depend>
   <depend>roslint</depend>
 </package>

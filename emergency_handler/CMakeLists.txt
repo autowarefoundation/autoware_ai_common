@@ -10,6 +10,7 @@ find_package(
   autoware_health_checker
   roscpp
   std_msgs
+  ros_observer
   roslint
 )
 

@@ -1,6 +1,5 @@
 #ifndef EMERGENCY_HANDLER_EMERGENCY_STOP_PLANNER_H
 #define EMERGENCY_HANDLER_EMERGENCY_STOP_PLANNER_H
-
 /*
  * Copyright 2015-2019 Autoware Foundation. All rights reserved.
  *

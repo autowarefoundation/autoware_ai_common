@@ -22,12 +22,13 @@
 #include <emergency_handler/emergency_handler.h>
 #include <emergency_handler/emergency_stop_planner.h>
 #include <emergency_handler/system_status_filter.h>
+#include <ros_observer/lib_ros_observer.h>
 
 EmergencyHandlingPriority EmergencyHandler::priority_table;
 
 // Constructor
-EmergencyHandler::EmergencyHandler(const ros::NodeHandle &nh, const ros::NodeHandle &pnh) :
-  nh_(nh), pnh_(pnh), status_sub_(nh, pnh)
+EmergencyHandler::EmergencyHandler(const ros::NodeHandle& nh, const ros::NodeHandle& pnh)
+  : nh_(nh), pnh_(pnh), status_sub_(nh, pnh)
 {
   pnh_.param<bool>("emergency_planner_enabled", is_emergency_planner_enabled_, false);
 
@@ -83,21 +84,21 @@ void EmergencyHandler::registerEmergencyPlanners(void)
   {
     if (itr->first == "semi-emergency_stop_planner")
     {
-      emergency_planner_map_.emplace(itr->second, std::shared_ptr<EmergencyPlanner>
-        (new SemiEmergencyStopPlanner((*itr), espdctl_max_dec)));
+      emergency_planner_map_.emplace(
+          itr->second, std::shared_ptr<EmergencyPlanner>(new SemiEmergencyStopPlanner((*itr), espdctl_max_dec)));
     }
     else if (itr->first == "emergency_stop_planner")
     {
-      emergency_planner_map_.emplace(itr->second, std::shared_ptr<EmergencyPlanner>
-        (new EmergencyStopPlanner((*itr), espdctl_max_dec)));
+      emergency_planner_map_.emplace(
+          itr->second, std::shared_ptr<EmergencyPlanner>(new EmergencyStopPlanner((*itr), espdctl_max_dec)));
     }
   }
 
   // emergency planner with priority=0 is registered if there exsts no emergency planner
   if (emergency_planner_map_.empty())
   {
-    emergency_planner_map_.emplace(0, std::shared_ptr<EmergencyPlanner>
-      (new EmergencyStopPlanner(std::pair<std::string, int>("emergency_stop_planner", 0), espdctl_max_dec)));
+    emergency_planner_map_.emplace(0, std::shared_ptr<EmergencyPlanner>(new EmergencyStopPlanner(
+                                          std::pair<std::string, int>("emergency_stop_planner", 0), espdctl_max_dec)));
   }
 }
 
@@ -132,7 +133,6 @@ std::shared_ptr<EmergencyPlanner> EmergencyHandler::find_target_emergency_planne
       target_emergency_planner = available_planner.begin()->second;
     }
   }
-
   return target_emergency_planner;
 }
 
@@ -158,7 +158,11 @@ void EmergencyHandler::run(void)
   ros::Time start_time = ros::Time::now();
   autoware_msgs::ControlCommand emergency_ctrl_cmd;
 
-  double loop_rate = autoware_health_checker::SYSTEM_UPDATE_RATE;
+  constexpr double loop_rate = autoware_health_checker::SYSTEM_UPDATE_RATE;
+  constexpr double timeout = 1.0 / loop_rate * 3;
+
+  bool is_shm_vmon_enabled;
+  ShmVitalMonitor shm_vmon("EmergencyHandler", loop_rate);
 
   ros::Rate rate(loop_rate);
   while (ros::ok())
@@ -166,7 +170,7 @@ void EmergencyHandler::run(void)
     ros::spinOnce();
 
     double dt = (ros::Time::now() - callback_time_).toSec();
-    const bool status_ok = !(is_system_status_received_ && (dt > 0.1));
+    const bool status_ok = !(is_system_status_received_ && (dt > timeout));
     updatePriority(status_ok);
 
     if (!is_urgent)
@@ -213,9 +217,13 @@ void EmergencyHandler::run(void)
       emergency_ctrl_cmd = epf.vehicle_cmd.ctrl_cmd;
 
       // Publish Emergency Command
-      if (epf.is_vehicle_cmd_updated) emvel_pub_.publish(epf.vehicle_cmd);
-      if (epf.is_lane_updated) emlane_pub_.publish(epf.lane);
+      if (epf.is_vehicle_cmd_updated)
+        emvel_pub_.publish(epf.vehicle_cmd);
+      if (epf.is_lane_updated)
+        emlane_pub_.publish(epf.lane);
     }
+    shm_vmon.run();
+
     rate.sleep();
   }
 }
