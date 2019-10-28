@@ -26,17 +26,23 @@
 struct LifeTime
 {
   LifeTime(double secs, int level) :
-    life_time_(secs), default_life_time_(secs), level_(level) {}
+    life_time_(secs), default_life_time_(secs), level_(level), activated_(false) {}
+
+  bool activated_;
   int level_;
   const double default_life_time_;
   double life_time_;
   const bool isDead() const
   {
-    return (life_time_ == 0.0);
+    return (activated_ && (life_time_ == 0.0));
   }
   void spend(double secs)
   {
-    life_time_ = std::max(life_time_ - secs, 0.0);
+    if (activated_) life_time_ = std::max(life_time_ - secs, 0.0);
+  }
+  void activate(void)
+  {
+    activated_ = true;
   }
   void reset()
   {

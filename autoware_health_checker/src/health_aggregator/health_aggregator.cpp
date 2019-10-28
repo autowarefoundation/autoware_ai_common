@@ -21,6 +21,7 @@
 #include <vector>
 #include <regex>
 #include <autoware_health_checker/health_aggregator/health_aggregator.h>
+#include <ros_observer/lib_ros_observer.h>
 
 namespace
 {
@@ -82,11 +83,14 @@ void HealthAggregator::run()
   ros::master::setRetryTimeout(ros::WallDuration(0.01));
   diagnostic_array_sub_ = nh_.subscribe(
     "diagnostics_agg", 10, &HealthAggregator::diagnosticArrayCallback, this);
+
   ros::Duration duration(1.0 / autoware_health_checker::SYSTEM_UPDATE_RATE);
   system_status_timer_ =
     nh_.createTimer(duration, &HealthAggregator::publishSystemStatus, this);
   vital_timer_ =
     nh_.createTimer(duration, &HealthAggregator::updateConnectionStatus, this);
+  ros_observer_timer_ =
+    nh_.createTimer(duration, &HealthAggregator::rosObserverVitalCheck, this);
 }
 
 void HealthAggregator::updateNodeStatus(
@@ -126,6 +130,16 @@ void HealthAggregator::publishSystemStatus(const ros::TimerEvent& event)
   {
     text_pub_[level].publish(generateOverlayText(system_status_, level));
   }
+}
+
+void HealthAggregator::rosObserverVitalCheck(const ros::TimerEvent& event)
+{
+  static constexpr double loop_rate = autoware_health_checker::SYSTEM_UPDATE_RATE;
+  static ShmVitalMonitor shm_ROvmon("RosObserver", loop_rate, VitalMonitorMode::CNT_MON);
+  static ShmVitalMonitor shm_HAvmon("HealthAggregator", loop_rate);
+
+  shm_ROvmon.run();
+  shm_HAvmon.run();
 }
 
 void HealthAggregator::updateConnectionStatus(const ros::TimerEvent& event)

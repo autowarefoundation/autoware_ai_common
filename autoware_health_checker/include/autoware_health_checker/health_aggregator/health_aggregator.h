@@ -68,7 +68,7 @@ private:
   std::map<ErrorLevel, ros::Publisher> text_pub_;
   ros::Subscriber node_status_sub_;
   ros::Subscriber diagnostic_array_sub_;
-  ros::Timer system_status_timer_, vital_timer_;
+  ros::Timer system_status_timer_, vital_timer_, ros_observer_timer_;
   std::vector<std::string> detected_nodes_;
   StatusMonitor status_monitor_;
   void updateNodeStatus(const autoware_system_msgs::NodeStatus& node_status);
@@ -85,6 +85,7 @@ private:
   autoware_health_checker::ParamManager param_manager_;
   std::mutex mtx_;
   void updateConnectionStatus(const ros::TimerEvent& event);
+  void rosObserverVitalCheck(const ros::TimerEvent& event);
   double hardware_diag_rate_;
   std::string hardware_diag_node_;
 };

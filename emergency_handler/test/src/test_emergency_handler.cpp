@@ -25,9 +25,9 @@
 class MyEmergencyHandler : public EmergencyHandler
 {
   friend class EmergencyHandlerTestSuite;
+
 public:
-  MyEmergencyHandler(const ros::NodeHandle &nh, const ros::NodeHandle &pnh):
-  EmergencyHandler(nh, pnh) {}
+  MyEmergencyHandler(const ros::NodeHandle& nh, const ros::NodeHandle& pnh) : EmergencyHandler(nh, pnh) {}
 };
 
 class EmergencyHandlerTestSuite : public ::testing::Test
@@ -119,9 +119,6 @@ public:
 
     double expected_spd = cmd.linear_velocity;
     double expected_str = cmd.steering_angle;
-    double max_dec;
-    myobj_->pnh_.param<double>("emergency_spdctl_max_dec", max_dec, 1.0);
-    max_dec = 1.0 / EMERGENCY_PLANNER_RATE;
 
     for (int i = 0; i < 200; i++)
     {
@@ -139,7 +136,7 @@ public:
   void feedbackTest2(void)
   {
     std::shared_ptr<EmergencyPlanner> target =
-    myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
+        myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
 
     autoware_msgs::ControlCommand cmd;
     cmd.linear_velocity = 2.0;
@@ -148,8 +145,9 @@ public:
     double expected_spd = cmd.linear_velocity;
     double expected_str = cmd.steering_angle;
     double max_dec;
+
     myobj_->pnh_.param<double>("emergency_spdctl_max_dec", max_dec, 1.0);
-    max_dec = 1.0 / EMERGENCY_PLANNER_RATE;
+    double dec_spd_each = max_dec / EMERGENCY_PLANNER_RATE;
 
     for (int i = 0; i < 200; i++)
     {
@@ -157,7 +155,7 @@ public:
       target->get_feedback_from_emergency_planner(&epf);
       cmd = epf.vehicle_cmd.ctrl_cmd;
 
-      expected_spd = std::max((expected_spd - max_dec), 0.0);
+      expected_spd = std::max((expected_spd - dec_spd_each), 0.0);
 
       ASSERT_EQ(cmd.linear_velocity, expected_spd);
       ASSERT_EQ(cmd.steering_angle, expected_str);
@@ -167,7 +165,7 @@ public:
   void feedbackTest3(void)
   {
     std::shared_ptr<EmergencyPlanner> target =
-    myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
+        myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
 
     autoware_msgs::ControlCommand cmd;
     cmd.linear_velocity = 2.0;
@@ -176,8 +174,9 @@ public:
     double expected_spd = cmd.linear_velocity;
     double expected_str = cmd.steering_angle;
     double max_dec;
+
     myobj_->pnh_.param<double>("emergency_spdctl_max_dec", max_dec, 1.0);
-    max_dec = 1.0 / EMERGENCY_PLANNER_RATE;
+    double dec_spd_each = max_dec / EMERGENCY_PLANNER_RATE;
 
     for (int i = 0; i < 200; i++)
     {
@@ -190,9 +189,9 @@ public:
       target->get_feedback_from_emergency_planner(&epf);
       cmd = epf.vehicle_cmd.ctrl_cmd;
 
-      if (i <  50)
+      if (i < 50)
       {
-        expected_spd = std::max((expected_spd - max_dec), 0.0);
+        expected_spd = std::max((expected_spd - dec_spd_each), 0.0);
       }
       else
       {
@@ -254,7 +253,6 @@ TEST_F(EmergencyHandlerTestSuite, LoadParamTest)
   loadParamTest();
 }
 
-
 TEST_F(EmergencyHandlerTestSuite, RegisterEmergencyPlannersTest1)
 {
   registerEmergencyPlannersTest();
@@ -296,7 +294,7 @@ TEST_F(EmergencyHandlerTestSuite, NodeStatusCallback)
 }
 
 // Run all the tests that were declared with TEST()
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "EmergencyHanderTestNode");

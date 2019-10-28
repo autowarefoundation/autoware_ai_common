@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_rviz_plugins
   rosunit
   rosgraph_msgs
+  ros_observer
   roslint
 )
 
@@ -17,7 +18,6 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES health_checker system_status_subscriber
   CATKIN_DEPENDS autoware_system_msgs rosgraph_msgs
-#  DEPENDS system_lib
 )
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++11")

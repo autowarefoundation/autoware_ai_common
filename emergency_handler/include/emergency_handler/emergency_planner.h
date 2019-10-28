@@ -47,6 +47,7 @@ class EmergencyPlanner
 {
 public:
   EmergencyPlanner(const std::pair<std::string, int> param, double max_dec) :
+
   required_priority_(param.second), name_(param.first) { max_dec_for_spdctl_ = max_dec / EMERGENCY_PLANNER_RATE ;}
 
   virtual ~EmergencyPlanner() {}

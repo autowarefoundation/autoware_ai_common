@@ -23,7 +23,7 @@ void FactorStatusArray::add(const DiagnosticStatus& status)
   if (keyset_.count(status.key) != 0)
   {
     auto const& found = std::find_if(dataset_.status.begin(), dataset_.status.end(),
-      [&](const DiagnosticStatus& st){ return (st.key == status.key);});  // NOLINT
+                                     [&](const DiagnosticStatus& st) { return (st.key == status.key); });  // NOLINT
     if (found != dataset_.status.end())
     {
       *found = status;
@@ -40,8 +40,10 @@ void FactorStatusArray::reset()
   dataset_.status.clear();
 }
 
-SystemStatusFilter::SystemStatusFilter() :
-  callback_(std::bind(&SystemStatusFilter::selectPriority, this, std::placeholders::_1)) {}
+SystemStatusFilter::SystemStatusFilter()
+  : callback_(std::bind(&SystemStatusFilter::selectPriority, this, std::placeholders::_1))
+{
+}
 
 int SystemStatusFilter::selectPriority(std::shared_ptr<SystemStatus> const status)
 {
@@ -115,8 +117,8 @@ StatusType SystemStatusFilter::calcStatus(const HardwareStatus& hw_status, int l
 
 StatusType SystemStatusFilter::calcStatus(std::string node_name, const std::vector<NodeStatus>& array, int level_th)
 {
-  const auto found = find_if(array.begin(), array.end(),
-    [=](const NodeStatus& s) {return s.node_name == node_name;});  // NOLINT
+  const auto found =
+      find_if(array.begin(), array.end(), [=](const NodeStatus& s) { return s.node_name == node_name; });  // NOLINT
   if (found != array.end())
   {
     return calcStatus(*found, level_th);
@@ -134,7 +136,8 @@ bool SystemStatusFilter::checkAllHardwareSimply(const std::vector<HardwareStatus
   return checkAllSimply<HardwareStatus>(array, level_th);
 }
 
-template<typename T> bool SystemStatusFilter::checkAllSimply(const std::vector<T>& array, int level_th)
+template <typename T>
+bool SystemStatusFilter::checkAllSimply(const std::vector<T>& array, int level_th)
 {
   bool is_ok = true;
   for (const auto& st : array)
