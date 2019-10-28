@@ -160,4 +160,35 @@ double calcPosesAngleDiffRad(const geometry_msgs::Pose &_p_from, const geometry_
   // convert to [-pi : pi]
   return normalizeRadian(calcPosesAngleDiffRaw(_p_from, _p_to));
 }
+
+bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3, geometry_msgs::Point p4, geometry_msgs::Point* intersect)
+{
+  return getIntersect(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y, &intersect->x, &intersect->y);
+}
+
+bool getIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double* intersect_x, double* intersect_y )
+{
+    //let p1(x1, y1), p2(x2, y2), p3(x3, y3), p4(x4,y4)
+    //intersect of line segment p1 to p2 and p3 to p4 satisfies
+    // p1 + r(p2 - p1) = p3 + s(p4 - p3)
+    // 0 <= r <= 1
+    // 0 <= s <= 1
+    double denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+
+    if(denominator == 0) {
+        //line is parallel
+        return false;
+    }
+
+    double r = ( (y4 - y3) * (x3 - x1) - (x4 - x3) * (y3 - y1) ) / denominator;
+    double s = ( (y2 - y1) * (x3 - x1) - (x2 - x1) * (y3 - y1) ) / denominator;
+
+    if( r >= 0 && r <= 1 && s >= 0 && s <= 1) {
+        *intersect_x = x1 + r * (x2 - x1);
+        *intersect_y = y1 + r * (y2 - y1);
+        return true;
+    }else{
+        return false;
+    }
+}
 }

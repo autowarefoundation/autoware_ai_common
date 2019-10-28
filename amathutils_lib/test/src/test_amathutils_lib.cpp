@@ -324,6 +324,22 @@ TEST(TestSuite, TestNormalizeRadian)
     ASSERT_DOUBLE_EQ(-M_PI, amathutils::normalizeRadian(-M_PI));
 }
 
+TEST(TestSuite, TestGetIntersect){
+	geometry_msgs::Point line1_p1, line1_p2, line2_p1, line2_p2, intersect_p;
+	line1_p1.x = 5;
+	line1_p1.y = 0;
+	line1_p2.x = 5;
+	line1_p2.y = 10;
+	line2_p1.x = 0;
+	line2_p1.y = 5;
+	line2_p2.x = 10;
+	line2_p2.y = 5;
+	
+	ASSERT_TRUE(amathutils::getIntersect(line1_p1, line1_p2, line2_p1, line2_p2, &intersect_p));
+	ASSERT_DOUBLE_EQ(5, intersect_p.x);
+	ASSERT_DOUBLE_EQ(5, intersect_p.y);
+}
+
 int main(int argc, char **argv) {
 	testing::InitGoogleTest(&argc, argv);
 	ros::init(argc, argv, "TestNode");
