@@ -78,7 +78,7 @@ void RateChecker::update()
   std::vector<ros::Time> buffer;
   for (const auto& el : data_)
   {
-    if (el > ros::Time::now() - ros::Duration(buffer_duration_))
+    if (el + ros::Duration(buffer_duration_) > ros::Time::now())
     {
       buffer.emplace_back(el);
     }
@@ -89,7 +89,7 @@ void RateChecker::update()
 boost::optional<double> RateChecker::getRate()
 {
   boost::optional<double> rate;
-  if (ros::Time::now() - start_time_ < ros::Duration(buffer_duration_))
+  if (ros::Time::now() < start_time_ + ros::Duration(buffer_duration_))
   {
     return boost::none;
   }
