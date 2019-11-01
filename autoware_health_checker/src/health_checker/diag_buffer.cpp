@@ -97,7 +97,7 @@ DiagBuffer::filterBuffer(ros::Time now, ErrorLevel level)
   autoware_system_msgs::DiagnosticStatusArray ret;
   for (const auto& data : filtered_data.status)
   {
-    if (data.header.stamp > (now - buffer_duration_))
+    if ((data.header.stamp + buffer_duration_) > now)
     {
       ret.status.emplace_back(data);
     }
