@@ -72,7 +72,7 @@ protected:
   void updatePriority(const bool status_ok);
   ros::Time callback_time_;
 
-  autoware_msgs::ControlCommand ctrl_cmd_;
+  autoware_msgs::VehicleCmd vehicle_cmd_;
 
   void wrapFunc(FilterFunc func, std::shared_ptr<SystemStatus> const status);
 

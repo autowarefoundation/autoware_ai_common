@@ -113,23 +113,23 @@ public:
   {
     std::shared_ptr<EmergencyPlanner> target = myobj_->find_target_emergency_planner(myobj_->priority_table.node_error);
 
-    autoware_msgs::ControlCommand cmd;
-    cmd.linear_velocity = 2.0;
-    cmd.steering_angle = 10.0;
+    autoware_msgs::VehicleCmd vehicle_cmd;
+    vehicle_cmd.ctrl_cmd.linear_velocity = 2.0;
+    vehicle_cmd.ctrl_cmd.steering_angle = 10.0;
 
-    double expected_spd = cmd.linear_velocity;
-    double expected_str = cmd.steering_angle;
+    double expected_spd = vehicle_cmd.ctrl_cmd.linear_velocity;
+    double expected_str = vehicle_cmd.ctrl_cmd.steering_angle;
 
     for (int i = 0; i < 200; i++)
     {
-      EmergencyPlannerFeedback epf(cmd);
+      EmergencyPlannerFeedback epf(vehicle_cmd);
       target->get_feedback_from_emergency_planner(&epf);
-      cmd = epf.vehicle_cmd.ctrl_cmd;
+      vehicle_cmd = epf.vehicle_cmd;
 
       expected_spd = 0;
 
-      ASSERT_EQ(cmd.linear_velocity, expected_spd);
-      ASSERT_EQ(cmd.steering_angle, expected_str);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.linear_velocity, expected_spd);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.steering_angle, expected_str);
     }
   }
 
@@ -138,12 +138,13 @@ public:
     std::shared_ptr<EmergencyPlanner> target =
         myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
 
-    autoware_msgs::ControlCommand cmd;
-    cmd.linear_velocity = 2.0;
-    cmd.steering_angle = 10.0;
+    autoware_msgs::VehicleCmd vehicle_cmd;
+    vehicle_cmd.ctrl_cmd.linear_velocity = 2.0;
+    vehicle_cmd.ctrl_cmd.steering_angle = 10.0;
 
-    double expected_spd = cmd.linear_velocity;
-    double expected_str = cmd.steering_angle;
+    double expected_spd = vehicle_cmd.ctrl_cmd.linear_velocity;
+    double expected_str = vehicle_cmd.ctrl_cmd.steering_angle;
+
     double max_dec;
 
     myobj_->pnh_.param<double>("emergency_spdctl_max_dec", max_dec, 1.0);
@@ -151,14 +152,14 @@ public:
 
     for (int i = 0; i < 200; i++)
     {
-      EmergencyPlannerFeedback epf(cmd);
+      EmergencyPlannerFeedback epf(vehicle_cmd);
       target->get_feedback_from_emergency_planner(&epf);
-      cmd = epf.vehicle_cmd.ctrl_cmd;
+      vehicle_cmd = epf.vehicle_cmd;
 
       expected_spd = std::max((expected_spd - dec_spd_each), 0.0);
 
-      ASSERT_EQ(cmd.linear_velocity, expected_spd);
-      ASSERT_EQ(cmd.steering_angle, expected_str);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.linear_velocity, expected_spd);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.steering_angle, expected_str);
     }
   }
 
@@ -167,12 +168,12 @@ public:
     std::shared_ptr<EmergencyPlanner> target =
         myobj_->find_target_emergency_planner(myobj_->priority_table.emergency_handler_error);
 
-    autoware_msgs::ControlCommand cmd;
-    cmd.linear_velocity = 2.0;
-    cmd.steering_angle = 10.0;
+    autoware_msgs::VehicleCmd vehicle_cmd;
+    vehicle_cmd.ctrl_cmd.linear_velocity = 2.0;
+    vehicle_cmd.ctrl_cmd.steering_angle = 10.0;
 
-    double expected_spd = cmd.linear_velocity;
-    double expected_str = cmd.steering_angle;
+    double expected_spd = vehicle_cmd.ctrl_cmd.linear_velocity;
+    double expected_str = vehicle_cmd.ctrl_cmd.steering_angle;
     double max_dec;
 
     myobj_->pnh_.param<double>("emergency_spdctl_max_dec", max_dec, 1.0);
@@ -185,9 +186,9 @@ public:
         target = myobj_->find_target_emergency_planner(myobj_->priority_table.node_error);
       }
 
-      EmergencyPlannerFeedback epf(cmd);
+      EmergencyPlannerFeedback epf(vehicle_cmd);
       target->get_feedback_from_emergency_planner(&epf);
-      cmd = epf.vehicle_cmd.ctrl_cmd;
+      vehicle_cmd = epf.vehicle_cmd;
 
       if (i < 50)
       {
@@ -198,8 +199,8 @@ public:
         expected_spd = 0;
       }
 
-      ASSERT_EQ(cmd.linear_velocity, expected_spd);
-      ASSERT_EQ(cmd.steering_angle, expected_str);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.linear_velocity, expected_spd);
+      ASSERT_EQ(vehicle_cmd.ctrl_cmd.steering_angle, expected_str);
     }
   }
 
@@ -218,9 +219,9 @@ public:
       ros::spinOnce();
     }
 
-    ASSERT_EQ(myobj_->ctrl_cmd_.linear_velocity, 3.0);
-    ASSERT_EQ(myobj_->ctrl_cmd_.linear_acceleration, 3.0);
-    ASSERT_EQ(myobj_->ctrl_cmd_.steering_angle, 3.0);
+    ASSERT_EQ(myobj_->vehicle_cmd_.ctrl_cmd.linear_velocity, 3.0);
+    ASSERT_EQ(myobj_->vehicle_cmd_.ctrl_cmd.linear_acceleration, 3.0);
+    ASSERT_EQ(myobj_->vehicle_cmd_.ctrl_cmd.steering_angle, 3.0);
   }
 
   void nodeStatusCallback(void)

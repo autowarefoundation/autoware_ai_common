@@ -30,11 +30,8 @@ static constexpr double EMERGENCY_PLANNER_RATE = 50.0;
 class EmergencyPlannerFeedback
 {
 public:
-  explicit EmergencyPlannerFeedback(autoware_msgs::ControlCommand cmd) :
-  is_vehicle_cmd_updated(false), is_lane_updated(false)
-  {
-    vehicle_cmd.ctrl_cmd = cmd;
-  }
+  explicit EmergencyPlannerFeedback(autoware_msgs::VehicleCmd cmd) :
+  is_vehicle_cmd_updated(false), is_lane_updated(false), vehicle_cmd(cmd) {}
 
   bool is_vehicle_cmd_updated;
   autoware_msgs::VehicleCmd vehicle_cmd;
