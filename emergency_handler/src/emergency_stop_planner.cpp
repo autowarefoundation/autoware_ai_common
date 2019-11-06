@@ -29,7 +29,8 @@ void SemiEmergencyStopPlanner::get_feedback_from_emergency_planner(EmergencyPlan
   epf->is_vehicle_cmd_updated = true;
   epf->vehicle_cmd.header.stamp = ros::Time::now();
   epf->vehicle_cmd.ctrl_cmd.linear_velocity =
-      std::max(epf->vehicle_cmd.ctrl_cmd.linear_velocity - max_dec_for_spdctl_, 0.0);
+  std::max(epf->vehicle_cmd.ctrl_cmd.linear_velocity - max_dec_for_spdctl_, 0.0);
+  epf->vehicle_cmd.twist_cmd.twist.linear.x = epf->vehicle_cmd.ctrl_cmd.linear_velocity;
   epf->vehicle_cmd.emergency = (epf->vehicle_cmd.ctrl_cmd.linear_velocity == 0.0) ? 1 : 0;
 }
 
@@ -44,5 +45,6 @@ void EmergencyStopPlanner::get_feedback_from_emergency_planner(EmergencyPlannerF
   epf->vehicle_cmd.header.stamp = ros::Time::now();
   epf->vehicle_cmd.emergency = 1;
   epf->vehicle_cmd.ctrl_cmd.linear_velocity = 0;
+  epf->vehicle_cmd.twist_cmd.twist.linear.x = 0;
   //  epf->vehicle_cmd.ctrl_cmd.steering_angle // No update use the previous steering angle
 }

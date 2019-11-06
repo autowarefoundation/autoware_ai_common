@@ -58,8 +58,10 @@ EmergencyHandler::EmergencyHandler(const ros::NodeHandle& nh, const ros::NodeHan
   callback_time_ = ros::Time::now();
   is_system_status_received_ = false;
 
-  ctrl_cmd_.linear_velocity = 0.0;
-  ctrl_cmd_.steering_angle = 0.0;
+  vehicle_cmd_.ctrl_cmd.linear_velocity = 0.0;
+  vehicle_cmd_.ctrl_cmd.steering_angle = 0.0;
+  vehicle_cmd_.twist_cmd.twist.linear.x = 0.0;
+  vehicle_cmd_.twist_cmd.twist.angular.z = 0.0;
 }
 
 void EmergencyHandler::setupPublisher(void)
@@ -138,7 +140,7 @@ std::shared_ptr<EmergencyPlanner> EmergencyHandler::find_target_emergency_planne
 
 void EmergencyHandler::vehicleCmdCallback(const autoware_msgs::VehicleCmd::ConstPtr& vehicle_cmd)
 {
-  ctrl_cmd_ = vehicle_cmd->ctrl_cmd;
+  vehicle_cmd_ = *vehicle_cmd;
 }
 
 // Add Filter
@@ -156,7 +158,7 @@ void EmergencyHandler::run(void)
 
   bool is_urgent = false;
   ros::Time start_time = ros::Time::now();
-  autoware_msgs::ControlCommand emergency_ctrl_cmd;
+  autoware_msgs::VehicleCmd emergency_vehicle_cmd;
 
   constexpr double loop_rate = autoware_health_checker::SYSTEM_UPDATE_RATE;
   constexpr double timeout = 1.0 / loop_rate * 3;
@@ -178,7 +180,7 @@ void EmergencyHandler::run(void)
       if (priority_ != priority_table.no_error)
       {
         start_time = ros::Time::now();
-        emergency_ctrl_cmd = ctrl_cmd_;
+        emergency_vehicle_cmd = vehicle_cmd_;
         is_urgent = true;
 
         // decision maker
@@ -212,9 +214,9 @@ void EmergencyHandler::run(void)
     if (is_urgent && is_emergency_planner_enabled_)
     {
       std::shared_ptr<EmergencyPlanner> target = find_target_emergency_planner(priority_);
-      EmergencyPlannerFeedback epf(emergency_ctrl_cmd);
+      EmergencyPlannerFeedback epf(emergency_vehicle_cmd);
       target->get_feedback_from_emergency_planner(&epf);
-      emergency_ctrl_cmd = epf.vehicle_cmd.ctrl_cmd;
+      emergency_vehicle_cmd = epf.vehicle_cmd;
 
       // Publish Emergency Command
       if (epf.is_vehicle_cmd_updated)
