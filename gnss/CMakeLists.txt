@@ -26,6 +26,15 @@ install(DIRECTORY include/${PROJECT_NAME}/
         FILES_MATCHING PATTERN "*.hpp"
         )
 
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  find_package(rosunit REQUIRED)
+
+  add_rostest_gtest(test_gnss test/test_gnss.test test/test_gnss.cpp
+                    src/geo_pos_conv.cpp)
+  target_link_libraries(test_gnss ${catkin_LIBRARIES})
+  add_dependencies(test_gnss ${catkin_EXPORTED_TARGETS})
+endif()
 
 install(TARGETS gnss
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
