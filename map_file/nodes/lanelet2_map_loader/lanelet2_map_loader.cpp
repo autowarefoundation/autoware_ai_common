@@ -67,6 +67,9 @@ int main(int argc, char** argv)
   for(const auto &error: errors)
   {
     ROS_ERROR_STREAM(error);
+  }
+  if(!errors.empty())
+  {
     return EXIT_FAILURE;
   }
 
