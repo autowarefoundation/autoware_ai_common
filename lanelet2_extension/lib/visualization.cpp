@@ -508,7 +508,10 @@ visualization_msgs::MarkerArray visualization::laneletsAsTriangleMarkerArray(con
       }
     }
   }
-  marker_array.markers.push_back(marker);
+  if (!marker.points.empty())
+  {
+    marker_array.markers.push_back(marker);
+  }
 
   return (marker_array);
 }
