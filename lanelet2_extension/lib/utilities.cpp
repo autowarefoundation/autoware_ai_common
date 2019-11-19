@@ -25,9 +25,9 @@
 #include <lanelet2_extension/utility/utilities.h>
 #include <ros/ros.h>
 
+#include <algorithm>
 #include <map>
 #include <utility>
-#include <algorithm>
 #include <vector>
 
 namespace lanelet
@@ -52,7 +52,7 @@ bool exists(const std::vector<int>& array, const int element)
 void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
                                 const lanelet::routing::RoutingGraphPtr routing_graph,
                                 const std::vector<autoware_msgs::Waypoint>& waypoints,
-                                std::map<int, std::vector<int> >* wp_candidate_lanelets)
+                                std::map<int, std::vector<int> >* wp_candidate_lanelets, const bool reverse)
 {
   if (!lanelet_map)
   {
@@ -87,7 +87,16 @@ void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
         continue;
 
       auto lanelet = lanelet_map->laneletLayer.get(candidate_id);
-      auto previous_lanelets = routing_graph->previous(lanelet);
+      // get available previous lanelet from routing graph
+      lanelet::ConstLanelets previous_lanelets;
+      if (reverse)
+      {
+        previous_lanelets = routing_graph->following(lanelet);
+      }
+      else
+      {
+        previous_lanelets = routing_graph->previous(lanelet);
+      }
 
       // connection is impossible if none of predecessor lanelets match with
       // lanelet candidates from previous waypoint
@@ -346,7 +355,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
   // eliminate impossible candidates using routing graph. (forward direction)
   for (const auto& lane : lane_array.lanes)
   {
-    removeImpossibleCandidates(lanelet_map, routing_graph, lane.waypoints, &wp_candidate_lanelet_ids);
+    removeImpossibleCandidates(lanelet_map, routing_graph, lane.waypoints, &wp_candidate_lanelet_ids, false);
   }
 
   // eliminate impossible candidates using routing graph. (reverse direction)
@@ -354,7 +363,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
   {
     auto reverse_waypoints = lane.waypoints;
     std::reverse(reverse_waypoints.begin(), reverse_waypoints.end());
-    removeImpossibleCandidates(lanelet_map, routing_graph, reverse_waypoints, &wp_candidate_lanelet_ids);
+    removeImpossibleCandidates(lanelet_map, routing_graph, reverse_waypoints, &wp_candidate_lanelet_ids, true);
   }
 
   for (auto candidate : wp_candidate_lanelet_ids)
@@ -364,7 +373,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
       ROS_WARN_STREAM("No lanelet was matched for waypoint with gid: " << candidate.first);
       continue;
     }
-    if (candidate.second.size() > 2)
+    if (candidate.second.size() >= 2)
     {
       ROS_WARN("ambiguous waypoint. Randomly choosing from candidates");
     }
