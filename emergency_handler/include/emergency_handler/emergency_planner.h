@@ -26,6 +26,7 @@
 #include <autoware_system_msgs/DiagnosticStatusArray.h>
 
 static constexpr double EMERGENCY_PLANNER_RATE = 50.0;
+static constexpr double EMERGENCY_PLANNER_STOP_THRESH = 0.5;
 
 class EmergencyPlannerFeedback
 {
