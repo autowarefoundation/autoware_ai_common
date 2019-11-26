@@ -68,7 +68,7 @@ protected:
   std::mutex priority_mutex_;
   std::mutex error_status_mutex_;
 
-  int priority_;
+  int priority_, latest_priority_;
   void updatePriority(const bool status_ok);
   ros::Time callback_time_;
 

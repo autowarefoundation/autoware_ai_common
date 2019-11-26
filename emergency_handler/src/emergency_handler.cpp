@@ -55,6 +55,7 @@ EmergencyHandler::EmergencyHandler(const ros::NodeHandle& nh, const ros::NodeHan
   EmergencyHandler::setupPublisher();
 
   priority_ = priority_table.no_error;
+  latest_priority_ = priority_table.no_error;
   callback_time_ = ros::Time::now();
   is_system_status_received_ = false;
 
@@ -206,7 +207,7 @@ void EmergencyHandler::run(void)
     {
       if ((ros::Time::now() - start_time).toSec() >= 10.0)
       {
-        priority_ = priority_table.no_error;
+        priority_ = latest_priority_;
         is_urgent = false;
       }
     }
@@ -234,7 +235,8 @@ void EmergencyHandler::run(void)
 void EmergencyHandler::wrapFunc(FilterFunc func, std::shared_ptr<SystemStatus> const status)
 {
   std::lock_guard<std::mutex> lock(priority_mutex_);
-  priority_ = std::min(func(status), priority_);
+  latest_priority_ = func(status);
+  priority_ = std::min(latest_priority_, priority_);
   callback_time_ = ros::Time::now();
   is_system_status_received_ = true;
 }
