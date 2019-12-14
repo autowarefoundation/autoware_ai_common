@@ -17,50 +17,50 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall ${CMAKE_CXX_FLAGS}")
 
 add_service_files(
   FILES
-  GetDTLane.srv
-  GetNode.srv
-  GetLane.srv
-  GetWayArea.srv
-  GetRoadEdge.srv
-  GetGutter.srv
-  GetCurb.srv
-  GetWhiteLine.srv
-  GetStopLine.srv
-  GetZebraZone.srv
+  GetCrossRoad.srv
   GetCrossWalk.srv
+  GetCurb.srv
+  GetCurveMirror.srv
+  GetDTLane.srv
+  GetDriveOnPortion.srv
+  GetFence.srv
+  GetGuardRail.srv
+  GetGutter.srv
+  GetLane.srv
+  GetNode.srv
+  GetRailCrossing.srv
+  GetRoadEdge.srv
   GetRoadMark.srv
   GetRoadPole.srv
   GetRoadSign.srv
+  GetSideStrip.srv
+  GetSideWalk.srv
   GetSignal.srv
+  GetStopLine.srv
   GetStreetLight.srv
   GetUtilityPole.srv
-  GetGuardRail.srv
-  GetSideWalk.srv
-  GetDriveOnPortion.srv
-  GetCrossRoad.srv
-  GetSideStrip.srv
-  GetCurveMirror.srv
   GetWall.srv
-  GetFence.srv
-  GetRailCrossing.srv
+  GetWayArea.srv
+  GetWhiteLine.srv
+  GetZebraZone.srv
   PositionState.srv
 )
 
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
-  autoware_msgs
-  vector_map_msgs
+    autoware_msgs
+    geometry_msgs
+    vector_map_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS 
-  message_runtime 
-  geometry_msgs 
-  autoware_msgs 
-  vector_map_msgs 
-  vector_map 
-  visualization_msgs
+    message_runtime 
+    geometry_msgs 
+    autoware_msgs 
+    vector_map_msgs 
+    vector_map 
+    visualization_msgs
 )
 
 include_directories(

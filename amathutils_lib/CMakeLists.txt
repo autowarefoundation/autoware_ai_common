@@ -16,9 +16,10 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall ${CMAKE_CXX_FLAGS}")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES amathutils_lib
-  CATKIN_DEPENDS autoware_msgs
-  tf
-  tf2
+  CATKIN_DEPENDS
+    autoware_msgs
+    tf
+    tf2
 )
 
 include_directories(
@@ -59,13 +60,14 @@ if(CATKIN_ENABLE_TESTING)
     test/test_kalman_filter.test
     test/src/test_kalman_filter.cpp
     src/kalman_filter.cpp
-    src/time_delay_kalman_filter.cpp)
+    src/time_delay_kalman_filter.cpp
+  )
   target_link_libraries(test-kalman_filter ${catkin_LIBRARIES})
 
   add_rostest_gtest(test-butterworth_filter 
-                    test/test_butterworth_filter.test
-                    test/src/test_butterworth_filter.cpp
-                    src/butterworth_filter.cpp) 
+    test/test_butterworth_filter.test
+    test/src/test_butterworth_filter.cpp
+    src/butterworth_filter.cpp
+  )
   target_link_libraries(test-butterworth_filter ${catkin_LIBRARIES})
-		  
 endif()

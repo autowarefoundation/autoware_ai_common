@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(lanelet2_extension)
 
 find_package(PkgConfig)
-find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h
+find_path(
+  GeographicLib_INCLUDE_DIR GeographicLib/Config.h
   PATH_SUFFIXES GeographicLib
-  )
+)
 set(GeographicLib_INCLUDE_DIRS ${GeographicLib_INCLUDE_DIR})
 
 find_library(GeographicLib_LIBRARIES
@@ -24,7 +25,9 @@ find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   amathutils_lib
-  roscpp
+  autoware_lanelet2_msgs
+  autoware_msgs
+  geometry_msgs
   lanelet2_core
   lanelet2_io
   lanelet2_maps
@@ -32,11 +35,9 @@ find_package(catkin REQUIRED COMPONENTS
   lanelet2_routing
   lanelet2_traffic_rules
   lanelet2_validation
-  autoware_lanelet2_msgs
-  autoware_msgs
-  geometry_msgs
-  visualization_msgs
+  roscpp
   roslint
+  visualization_msgs
 )
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
@@ -45,7 +46,19 @@ roslint_cpp()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lanelet2_extension_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
+  CATKIN_DEPENDS
+    amathutils_lib
+    autoware_lanelet2_msgs
+    autoware_msgs
+    geometry_msgs
+    lanelet2_core
+    lanelet2_io
+    lanelet2_maps
+    lanelet2_projection
+    lanelet2_routing
+    lanelet2_traffic_rules
+    lanelet2_validation
+    visualization_msgs
 )
 
 include_directories(
@@ -55,9 +68,9 @@ include_directories(
   ${PUGIXML_INCLUDE_DIRS}
 )
 
-add_definitions (${GeographicLib_DEFINITIONS})
+add_definitions(${GeographicLib_DEFINITIONS})
 
-add_library( lanelet2_extension_lib
+add_library(lanelet2_extension_lib
   lib/autoware_osm_parser.cpp
   lib/autoware_traffic_light.cpp
   lib/message_conversion.cpp
@@ -95,10 +108,12 @@ target_link_libraries(autoware_lanelet2_validation
 install(TARGETS lanelet2_extension_lib lanelet2_extension_sample autoware_lanelet2_validation
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 if(CATKIN_ENABLE_TESTING)
  roslint_add_test()

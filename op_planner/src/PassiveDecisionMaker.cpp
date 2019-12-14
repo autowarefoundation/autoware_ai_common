@@ -20,7 +20,7 @@ PassiveDecisionMaker::PassiveDecisionMaker()
 
 PassiveDecisionMaker& PassiveDecisionMaker::operator=(const PassiveDecisionMaker& obj)
 {
-	return *this;
+  return *this;
 }
 
 PassiveDecisionMaker::PassiveDecisionMaker(const PassiveDecisionMaker& obj)
@@ -33,15 +33,15 @@ PassiveDecisionMaker::~PassiveDecisionMaker()
 
  double PassiveDecisionMaker::GetVelocity(PlannerHNS::WayPoint& currPose, const std::vector<WayPoint>& path, const CAR_BASIC_INFO& carInfo, const RelativeInfo& info)
  {
-	double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 1.0;
-	int prev_index = 0;
-	double velocity = PlannerHNS::PlanningHelpers::GetVelocityAhead(path, info, prev_index, average_braking_distance);
-	if(velocity > carInfo.max_speed_forward)
-		velocity = carInfo.max_speed_forward;
-	else if(velocity < carInfo.min_speed_forward)
-		velocity = carInfo.min_speed_forward;
+  double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 1.0;
+  int prev_index = 0;
+  double velocity = PlannerHNS::PlanningHelpers::GetVelocityAhead(path, info, prev_index, average_braking_distance);
+  if(velocity > carInfo.max_speed_forward)
+    velocity = carInfo.max_speed_forward;
+  else if(velocity < carInfo.min_speed_forward)
+    velocity = carInfo.min_speed_forward;
 
-	return velocity;
+  return velocity;
  }
 
  double PassiveDecisionMaker::GetSteerAngle(PlannerHNS::WayPoint& currPose, const std::vector<WayPoint>& path, const RelativeInfo& info)
@@ -60,93 +60,93 @@ PassiveDecisionMaker::~PassiveDecisionMaker()
 
  bool PassiveDecisionMaker::CheckForStopLine(PlannerHNS::WayPoint& currPose, const std::vector<WayPoint>& path, const CAR_BASIC_INFO& carInfo)
  {
-	 double minStoppingDistance = -pow(currPose.v, 2)/(carInfo.max_deceleration);
-	 double critical_long_front_distance =  carInfo.wheel_base/2.0 + carInfo.length/2.0;
+   double minStoppingDistance = -pow(currPose.v, 2)/(carInfo.max_deceleration);
+   double critical_long_front_distance =  carInfo.wheel_base/2.0 + carInfo.length/2.0;
 
-	int stopLineID = -1;
-	int stopSignID = -1;
-	int trafficLightID = -1;
-	double distanceToClosestStopLine = 0;
+  int stopLineID = -1;
+  int stopSignID = -1;
+  int trafficLightID = -1;
+  double distanceToClosestStopLine = 0;
 
-	distanceToClosestStopLine = PlanningHelpers::GetDistanceToClosestStopLineAndCheck(path, currPose, 0, stopLineID, stopSignID, trafficLightID) - critical_long_front_distance;
+  distanceToClosestStopLine = PlanningHelpers::GetDistanceToClosestStopLineAndCheck(path, currPose, 0, stopLineID, stopSignID, trafficLightID) - critical_long_front_distance;
 
-	if(distanceToClosestStopLine > -2 && distanceToClosestStopLine < minStoppingDistance)
-	{
-		return true;
-	}
+  if(distanceToClosestStopLine > -2 && distanceToClosestStopLine < minStoppingDistance)
+  {
+    return true;
+  }
 
-	return false;
+  return false;
  }
 
  PlannerHNS::BehaviorState PassiveDecisionMaker::MoveStep(const double& dt, PlannerHNS::WayPoint& currPose, const std::vector<WayPoint>& path, const CAR_BASIC_INFO& carInfo)
  {
-	 PlannerHNS::BehaviorState beh;
-	 if(path.size() == 0) return beh;
+   PlannerHNS::BehaviorState beh;
+   if(path.size() == 0) return beh;
 
-	 RelativeInfo info;
-	 PlanningHelpers::GetRelativeInfo(path, currPose, info);
+   RelativeInfo info;
+   PlanningHelpers::GetRelativeInfo(path, currPose, info);
 
-	 bool bStopLine = CheckForStopLine(currPose, path, carInfo);
-	 if(bStopLine)
-		 beh.state = PlannerHNS::STOPPING_STATE;
-	 else
-		 beh.state = PlannerHNS::FORWARD_STATE;
+   bool bStopLine = CheckForStopLine(currPose, path, carInfo);
+   if(bStopLine)
+     beh.state = PlannerHNS::STOPPING_STATE;
+   else
+     beh.state = PlannerHNS::FORWARD_STATE;
 
-	 double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 1.0;
+   double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 1.0;
 
-	if(average_braking_distance  < 10)
-		average_braking_distance = 10;
+  if(average_braking_distance  < 10)
+    average_braking_distance = 10;
 
-	beh.indicator = PlanningHelpers::GetIndicatorsFromPath(path, currPose, average_braking_distance);
+  beh.indicator = PlanningHelpers::GetIndicatorsFromPath(path, currPose, average_braking_distance);
 
-	currPose.v = beh.maxVelocity = GetVelocity(currPose, path, carInfo, info);
+  currPose.v = beh.maxVelocity = GetVelocity(currPose, path, carInfo, info);
 
-	double steer = GetSteerAngle(currPose, path, info);
+  double steer = GetSteerAngle(currPose, path, info);
 
-	currPose.pos.x += currPose.v * dt * cos(currPose.pos.a);
-	currPose.pos.y += currPose.v * dt * sin(currPose.pos.a);
-	currPose.pos.a += currPose.v * dt * tan(steer)  / carInfo.wheel_base;
+  currPose.pos.x += currPose.v * dt * cos(currPose.pos.a);
+  currPose.pos.y += currPose.v * dt * sin(currPose.pos.a);
+  currPose.pos.a += currPose.v * dt * tan(steer)  / carInfo.wheel_base;
 
-	return beh;
+  return beh;
 
  }
 
  PlannerHNS::ParticleInfo PassiveDecisionMaker::MoveStepSimple(const double& dt, PlannerHNS::WayPoint& currPose, const std::vector<WayPoint>& path, const CAR_BASIC_INFO& carInfo)
   {
- 	 PlannerHNS::ParticleInfo beh;
- 	 if(path.size() == 0) return beh;
+    PlannerHNS::ParticleInfo beh;
+    if(path.size() == 0) return beh;
 
- 	 RelativeInfo info;
- 	 PlanningHelpers::GetRelativeInfo(path, currPose, info);
+    RelativeInfo info;
+    PlanningHelpers::GetRelativeInfo(path, currPose, info);
 
- 	 bool bStopLine = CheckForStopLine(currPose, path, carInfo);
- 	 if(bStopLine)
- 		 beh.state = PlannerHNS::STOPPING_STATE;
- 	 else
- 		 beh.state = PlannerHNS::FORWARD_STATE;
+    bool bStopLine = CheckForStopLine(currPose, path, carInfo);
+    if(bStopLine)
+      beh.state = PlannerHNS::STOPPING_STATE;
+    else
+      beh.state = PlannerHNS::FORWARD_STATE;
 
- 	 double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 15.0;
-
-
- 	PlannerHNS::WayPoint startPose = path.at(0);
- 	beh.indicator = PlanningHelpers::GetIndicatorsFromPath(path, startPose, average_braking_distance);
+    double average_braking_distance = -pow(currPose.v, 2)/(carInfo.max_deceleration) + 15.0;
 
 
- 	double speed = 0;
- 	if(info.iFront < path.size())
- 	{
- 		beh.vel = path.at(info.iFront).v;
- 	}
- 	else
- 		beh.vel = 0;
+   PlannerHNS::WayPoint startPose = path.at(0);
+   beh.indicator = PlanningHelpers::GetIndicatorsFromPath(path, startPose, average_braking_distance);
 
- 	double steer = GetSteerAngle(currPose, path, info);
 
- 	currPose.pos.x += currPose.v * dt * cos(currPose.pos.a);
- 	currPose.pos.y += currPose.v * dt * sin(currPose.pos.a);
- 	currPose.pos.a += currPose.v * dt * tan(steer)  / carInfo.wheel_base;
+   double speed = 0;
+   if(info.iFront < path.size())
+   {
+     beh.vel = path.at(info.iFront).v;
+   }
+   else
+     beh.vel = 0;
 
- 	return beh;
+   double steer = GetSteerAngle(currPose, path, info);
+
+   currPose.pos.x += currPose.v * dt * cos(currPose.pos.a);
+   currPose.pos.y += currPose.v * dt * sin(currPose.pos.a);
+   currPose.pos.a += currPose.v * dt * tan(steer)  / carInfo.wheel_base;
+
+   return beh;
 
   }
 

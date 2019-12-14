@@ -5,19 +5,19 @@ project(object_map)
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  roslint
-  pcl_ros
-  pcl_conversions
-  tf
-  sensor_msgs
-  nav_msgs
-  grid_map_ros
+  autoware_msgs
   grid_map_cv
   grid_map_msgs
-  autoware_msgs
-  vector_map
+  grid_map_ros
   lanelet2_extension
+  nav_msgs
+  pcl_conversions
+  pcl_ros
+  roscpp
+  roslint
+  sensor_msgs
+  tf
+  vector_map
 )
 
 # TODO add other files into roslint
@@ -28,30 +28,29 @@ roslint_cpp(
   include/wayarea2grid_lanelet2/wayarea2grid_lanelet2.h
 )
 
-
 find_package(Qt5Core REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 find_package(OpenMP)
 
 if (OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif ()
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES object_map_utils_lib
   CATKIN_DEPENDS
-  pcl_ros
-  pcl_conversions
-  tf
-  sensor_msgs
-  nav_msgs
-  autoware_msgs
-  grid_map_msgs
-  vector_map
-  lanelet2_extension
+    pcl_ros
+    pcl_conversions
+    tf
+    sensor_msgs
+    nav_msgs
+    autoware_msgs
+    grid_map_msgs
+    vector_map
+    lanelet2_extension
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
@@ -132,33 +131,34 @@ target_link_libraries(wayarea2grid
 )
       
 add_library(wayarea2grid_lanelet2_lib
-        include/object_map/object_map_utils.hpp
-        nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2.cpp
-        )
+  include/object_map/object_map_utils.hpp
+  nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2.cpp
+)
 target_link_libraries(wayarea2grid_lanelet2_lib
-        ${catkin_LIBRARIES}
-        object_map_utils_lib
-        )
+  ${catkin_LIBRARIES}
+  object_map_utils_lib
+)
 
 add_executable(wayarea2grid_lanelet2
-        nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2_node.cpp
-        )
+  nodes/wayarea2grid_lanelet2/wayarea2grid_lanelet2_node.cpp
+)
 
 target_link_libraries(wayarea2grid_lanelet2
-        ${catkin_LIBRARIES}
-        wayarea2grid_lanelet2_lib
-        )
-
-install(TARGETS
-  wayarea2grid
-  wayarea2grid_lib
-  wayarea2grid_lanelet2
+  ${catkin_LIBRARIES}
   wayarea2grid_lanelet2_lib
-  grid_map_filter_lib
-  grid_map_filter
-  potential_field
-  laserscan2costmap
-  object_map_utils_lib
+)
+
+install(
+  TARGETS
+    wayarea2grid
+    wayarea2grid_lib
+    wayarea2grid_lanelet2
+    wayarea2grid_lanelet2_lib
+    grid_map_filter_lib
+    grid_map_filter
+    potential_field
+    laserscan2costmap
+    object_map_utils_lib
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

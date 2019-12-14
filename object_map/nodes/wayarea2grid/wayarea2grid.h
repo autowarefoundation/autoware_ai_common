@@ -40,51 +40,51 @@
 namespace object_map
 {
 
-	class WayareaToGrid
-	{
-	public:
-		WayareaToGrid();
+  class WayareaToGrid
+  {
+  public:
+    WayareaToGrid();
 
-		void Run();
+    void Run();
 
-	private:
-		// handle
-		ros::NodeHandle         node_handle_;
-		ros::NodeHandle         private_node_handle_;
+  private:
+    // handle
+    ros::NodeHandle         node_handle_;
+    ros::NodeHandle         private_node_handle_;
 
-		ros::Publisher          publisher_grid_map_;
-		ros::Publisher          publisher_occupancy_;
+    ros::Publisher          publisher_grid_map_;
+    ros::Publisher          publisher_occupancy_;
 
-		grid_map::GridMap       gridmap_;
+    grid_map::GridMap       gridmap_;
 
-		std::string             sensor_frame_;
-		std::string             map_frame_;
+    std::string             sensor_frame_;
+    std::string             map_frame_;
 
-		const std::string       grid_layer_name_ = "wayarea";
+    const std::string       grid_layer_name_ = "wayarea";
 
-		double                  grid_resolution_;
-		double                  grid_length_x_;
-		double                  grid_length_y_;
-		double                  grid_position_x_;
-		double                  grid_position_y_;
-		double                  grid_position_z_;
+    double                  grid_resolution_;
+    double                  grid_length_x_;
+    double                  grid_length_y_;
+    double                  grid_position_x_;
+    double                  grid_position_y_;
+    double                  grid_position_z_;
 
-		tf::TransformListener   tf_listener_;
+    tf::TransformListener   tf_listener_;
 
-		int                     OCCUPANCY_ROAD      = 128;
-		int                     OCCUPANCY_NO_ROAD   = 255;
-		const int               grid_min_value_     = 0;
-		const int               grid_max_value_     = 255;
+    int                     OCCUPANCY_ROAD      = 128;
+    int                     OCCUPANCY_NO_ROAD   = 255;
+    const int               grid_min_value_     = 0;
+    const int               grid_max_value_     = 255;
 
-		std::vector<std::vector<geometry_msgs::Point>> area_points_;
+    std::vector<std::vector<geometry_msgs::Point>> area_points_;
 
-		/*!
-		 * Initializes ROS Publisher, Subscribers and sets the configuration parameters
-		 */
-		void InitializeROSIo();
+    /*!
+     * Initializes ROS Publisher, Subscribers and sets the configuration parameters
+     */
+    void InitializeROSIo();
 
 
-	};
+  };
 
 }  // namespace object_map
 

@@ -28,7 +28,7 @@ include_directories(
 
 add_executable(
   ros_observer
-  ./src/ros_observer.cpp
+  src/ros_observer.cpp
 )
 
 target_link_libraries(
@@ -49,7 +49,8 @@ add_library(
 target_link_libraries(
   lib_ros_observer
   ${catkin_LIBRARIES}
-  rt ${Boost_LIBRARIES}
+  rt
+  ${Boost_LIBRARIES}
 )
 
 add_dependencies(
@@ -78,9 +79,11 @@ if (CATKIN_ENABLE_TESTING)
   roslint_add_test()
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_ros_observer
-  test/test_ros_observer.test
-  test/src/test_ros_observer.cpp)
+    test/test_ros_observer.test
+    test/src/test_ros_observer.cpp
+  )
   target_link_libraries(test_ros_observer
-  lib_ros_observer
-  ${catkin_LIBRARIES})
+    lib_ros_observer
+    ${catkin_LIBRARIES}
+  )
 endif()

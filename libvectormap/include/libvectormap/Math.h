@@ -32,29 +32,29 @@ template<typename F> static F radianToDegree (const F radian)
 
 inline double distance (const Point2 &p1, const Point2 &p2)
 {
-	Vector2 p3 (p2.x()-p1.x(), p2.y()-p1.y());
-	return sqrt (p3.squaredNorm());
+  Vector2 p3 (p2.x()-p1.x(), p2.y()-p1.y());
+  return sqrt (p3.squaredNorm());
 }
 
 
 inline double distance (const Point3 &p1, const Point3 &p2)
 {
-	Vector3 p3 (p2.x()-p1.x(), p2.y()-p1.y(), p2.z()-p1.z());
-	return sqrt(p3.squaredNorm());
+  Vector3 p3 (p2.x()-p1.x(), p2.y()-p1.y(), p2.z()-p1.z());
+  return sqrt(p3.squaredNorm());
 }
 
 
 inline double distance (const Point4 &p1, const Point4 &p2)
 {
-	Vector4 p3 (p2.x()-p1.x(), p2.y()-p1.y(), p2.z()-p1.z(), p2.w()-p1.w());
-	return sqrt(p3.squaredNorm());
+  Vector4 p3 (p2.x()-p1.x(), p2.y()-p1.y(), p2.z()-p1.z(), p2.w()-p1.w());
+  return sqrt(p3.squaredNorm());
 }
 
 
 inline double distance (const double &x1, const double &y1, const double &x2, const double &y2)
 {
-	Point2 p(x1, y1), q(x2, y2);
-	return distance (p, q);
+  Point2 p(x1, y1), q(x2, y2);
+  return distance (p, q);
 }
 
 
@@ -64,14 +64,14 @@ inline Vector2 perpendicular (const Vector2 &v)
 
 inline void rotate (Vector2 &v, const float angleInDegree)
 {
-	Matrix2 rot;
-	double c = cos (degreeToRadian(angleInDegree)),
-		s = sin (degreeToRadian(angleInDegree));
-	rot (0, 0) = c;
-	rot (0, 1) = -s;
-	rot (1, 0) = s;
-	rot (1, 1) = c;
-	v = rot * v;
+  Matrix2 rot;
+  double c = cos (degreeToRadian(angleInDegree)),
+    s = sin (degreeToRadian(angleInDegree));
+  rot (0, 0) = c;
+  rot (0, 1) = -s;
+  rot (1, 0) = s;
+  rot (1, 1) = c;
+  v = rot * v;
 }
 
 

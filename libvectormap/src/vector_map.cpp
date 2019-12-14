@@ -10,13 +10,13 @@ void VectorMap::load_points(const vector_map::PointArray& msg)
   for (const auto& point : msg.data)
     {
       Point tmp;
-      tmp.pid	 = point.pid;
+      tmp.pid   = point.pid;
       tmp.b      = point.b;
       tmp.l      = point.l;
       tmp.h      = point.h;
-      tmp.bx	 = point.ly;
-      tmp.ly	 = point.bx;
-      tmp.ref	 = point.ref;
+      tmp.bx   = point.ly;
+      tmp.ly   = point.bx;
+      tmp.ref   = point.ref;
       tmp.mcode1 = point.mcode1;
       tmp.mcode2 = point.mcode2;
       tmp.mcode3 = point.mcode3;

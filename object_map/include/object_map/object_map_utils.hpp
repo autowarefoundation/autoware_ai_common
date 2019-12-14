@@ -72,20 +72,20 @@ namespace object_map
                                      const std::string &in_source_frame,
                                      const tf::TransformListener &in_tf_listener);
 
-	/*!
-		 * Loads regions defined as road inside the vector map, according to the field named "wayarea"
-		 */
-	void LoadRoadAreasFromVectorMap(ros::NodeHandle& in_private_node_handle,
-	                                std::vector<std::vector<geometry_msgs::Point>>& out_area_points);
+  /*!
+     * Loads regions defined as road inside the vector map, according to the field named "wayarea"
+     */
+  void LoadRoadAreasFromVectorMap(ros::NodeHandle& in_private_node_handle,
+                                  std::vector<std::vector<geometry_msgs::Point>>& out_area_points);
 
-	/*!
-	 * Extracts all the points forming in_area inside in_vectormap
-	 * @param[in] in_area Area to extract its points
-	 * @param[in] in_vectormap VectorMap object to which in_area belongs
-	 * @return Array of points forming in_area
-	 */
-	std::vector<geometry_msgs::Point>
-	SearchAreaPoints(const vector_map::Area &in_area, const vector_map::VectorMap &in_vectormap);
+  /*!
+   * Extracts all the points forming in_area inside in_vectormap
+   * @param[in] in_area Area to extract its points
+   * @param[in] in_vectormap VectorMap object to which in_area belongs
+   * @return Array of points forming in_area
+   */
+  std::vector<geometry_msgs::Point>
+  SearchAreaPoints(const vector_map::Area &in_area, const vector_map::VectorMap &in_vectormap);
 
   /*!
    * Projects the in_area_points forming the road, stores the result in out_grid_map.
