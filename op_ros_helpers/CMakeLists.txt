@@ -5,18 +5,18 @@ project(op_ros_helpers)
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
+  autoware_msgs
   geometry_msgs
+  jsk_recognition_msgs
+  libwaypoint_follower
   map_file
+  op_planner
+  op_simu
+  op_utility
   pcl_conversions
   pcl_ros
   sensor_msgs
   tf
-  jsk_recognition_msgs
-  op_utility
-  op_planner
-  op_simu
-  libwaypoint_follower
-  autoware_msgs
   vector_map_msgs
 )
 
@@ -24,19 +24,10 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  geometry_msgs
-  autoware_msgs
-  map_file
-  pcl_conversions
-  pcl_ros
-  sensor_msgs
-  tf
-  jsk_recognition_msgs
-  op_utility
-  op_planner
-  op_simu
-  libwaypoint_follower
-  vector_map_msgs
+    autoware_msgs
+    geometry_msgs
+    libwaypoint_follower
+    vector_map_msgs
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -g -Wall -Wno-unused-result ${CMAKE_CXX_FLAGS}")

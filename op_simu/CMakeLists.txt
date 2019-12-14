@@ -16,18 +16,12 @@ find_package(GLUT REQUIRED)
 find_package(X11 REQUIRED)
 find_package(Threads REQUIRED)
 
-###################################
-## catkin specific configuration ##
-###################################
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS op_utility op_planner
 )
 
-###########
-## Build ##
-###########
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}

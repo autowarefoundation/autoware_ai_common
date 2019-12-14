@@ -120,14 +120,14 @@ class VectorMap
 
 
   VectorMap () :
-	  loaded(false) {}
+    loaded(false) {}
 
   inline Point3 getPoint (const int idx)
   {
-	  Point3 p;
-	  Point psrc = points[idx];
-	  p.x() = psrc.bx; p.y() = psrc.ly, p.z() = psrc.h;
-	  return p;
+    Point3 p;
+    Point psrc = points[idx];
+    p.x() = psrc.bx; p.y() = psrc.ly, p.z() = psrc.h;
+    return p;
   }
 
 };

@@ -28,18 +28,18 @@
 
 class GetFile {
 private:
-	std::string host_name_;
-	int port_;
-	std::string user_;
-	std::string password_;
-	int sock;
-	struct sockaddr_in server;
+  std::string host_name_;
+  int port_;
+  std::string user_;
+  std::string password_;
+  int sock;
+  struct sockaddr_in server;
 
 public:
-	GetFile();
-	explicit GetFile(const std::string& host_name, int port, const std::string& user, const std::string& password);
+  GetFile();
+  explicit GetFile(const std::string& host_name, int port, const std::string& user, const std::string& password);
 
-	int GetHTTPFile(const std::string& value);
+  int GetHTTPFile(const std::string& value);
 };
 
 

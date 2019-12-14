@@ -20,10 +20,10 @@
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "grid_map_filter");
-	object_map::GridMapFilter grid_map_filter;
+  ros::init(argc, argv, "grid_map_filter");
+  object_map::GridMapFilter grid_map_filter;
 
-	grid_map_filter.Run();
+  grid_map_filter.Run();
 
-	return 0;
+  return 0;
 }

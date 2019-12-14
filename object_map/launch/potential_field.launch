@@ -1,7 +1,7 @@
 <!-- -->
 <launch>
   <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization">
-  	<rosparam command="load" file="$(find object_map)/config/potential.yaml" />
+    <rosparam command="load" file="$(find object_map)/config/potential.yaml" />
   </node>
   <arg name="use_obstacle_box" default="true" />
   <arg name="use_vscan_points" default="false" />
@@ -14,7 +14,7 @@
 
   <node pkg="tf" type="static_transform_publisher" name="potential_field_link_tf_publiser" args="$(arg map_x_offset) 0 0 0 0 0 base_link potential_field_link 100" />
 
-	<node pkg="object_map" type="potential_field" name="potential_field">
+  <node pkg="object_map" type="potential_field" name="potential_field">
     <param name="use_obstacle_box" type="bool" value="$(arg use_obstacle_box)"/>
     <param name="use_vscan_points" type="bool" value="$(arg use_vscan_points)"/>
     <param name="use_target_waypoint" type="bool" value="$(arg use_target_waypoint)"/>
@@ -22,6 +22,6 @@
     <param name="map_x_size" type="double" value="$(arg map_x_size)"/>
     <param name="map_y_size" type="double" value="$(arg map_y_size)"/>
     <param name="map_x_offset" type="double" value="$(arg map_x_offset)"/>
-	</node>
+  </node>
 
 </launch>
