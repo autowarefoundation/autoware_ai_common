@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
   sig_handler_init();
 
   struct tm localtime;
-  char buf[50];
   auto now = std::chrono::system_clock::now();
   auto now_c = std::chrono::system_clock::to_time_t(now);
   localtime_r(&now_c, &localtime);
