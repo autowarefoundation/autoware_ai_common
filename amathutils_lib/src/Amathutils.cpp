@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Autoware Foundation. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <amathutils_lib/amathutils.hpp>
 
 namespace amathutils
@@ -79,42 +95,43 @@ int isPointLeftFromLine(const geometry_msgs::Point &_target, const geometry_msgs
 }
 
 
-//Following implementation comes from the website below:
-//Author: Dan Sunday
-//site: http://geomalgorithms.com/a02-_lines.html
-//viewed: 2019/5/20
-double distanceFromSegment( const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2, const geometry_msgs::Point &_p)
+// Following implementation comes from the website below:
+// Author: Dan Sunday
+// site: http://geomalgorithms.com/a02-_lines.html
+// viewed: 2019/5/20
+double distanceFromSegment(
+  const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2, const geometry_msgs::Point &_p)
 {
   geometry_msgs::Point v, w;
   v.x = _l2.x - _l1.x;
   v.y = _l2.y - _l1.y;
   v.z = _l2.z - _l1.z;
-  
+
   w.x = _p.x - _l1.x;
   w.y = _p.y - _l1.y;
   w.z = _p.z - _l1.z;
-  
+
   double dot_vw = v.x * w.x + v.y * w.y + v.z * w.z;
   double dot_vv = v.x * v.x + v.y * v.y + v.z * v.z;
-  
-  if ( dot_vw <= 0 )
+
+  if (dot_vw <= 0)
   {
-      return find_distance(_p, _l1);
+    return find_distance(_p, _l1);
   }
-  if ( dot_vv <= dot_vw)
+
+  if (dot_vv <= dot_vw)
   {
-      return find_distance(_p, _l2);
+    return find_distance(_p, _l2);
   }
-  
+
   double b = dot_vw / dot_vv;
   geometry_msgs::Point pb;
-  pb.x = _l1.x + b * v.x; 
-  pb.y = _l1.y + b * v.y; 
-  pb.z = _l1.z + b * v.z; 
-  
+  pb.x = _l1.x + b * v.x;
+  pb.y = _l1.y + b * v.y;
+  pb.z = _l1.z + b * v.z;
+
   return find_distance(_p, pb);
 }
-
 
 double getPoseYawAngle(const geometry_msgs::Pose &_pose)
 {
@@ -161,34 +178,41 @@ double calcPosesAngleDiffRad(const geometry_msgs::Pose &_p_from, const geometry_
   return normalizeRadian(calcPosesAngleDiffRaw(_p_from, _p_to));
 }
 
-bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3, geometry_msgs::Point p4, geometry_msgs::Point* intersect)
+bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3,
+  geometry_msgs::Point p4, geometry_msgs::Point* intersect)
 {
   return getIntersect(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y, &intersect->x, &intersect->y);
 }
 
-bool getIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double* intersect_x, double* intersect_y )
+bool getIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4,
+  double y4, double* intersect_x, double* intersect_y )
 {
-    //let p1(x1, y1), p2(x2, y2), p3(x3, y3), p4(x4,y4)
-    //intersect of line segment p1 to p2 and p3 to p4 satisfies
+    // let p1(x1, y1), p2(x2, y2), p3(x3, y3), p4(x4,y4)
+    // intersect of line segment p1 to p2 and p3 to p4 satisfies
     // p1 + r(p2 - p1) = p3 + s(p4 - p3)
     // 0 <= r <= 1
     // 0 <= s <= 1
     double denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
 
-    if(denominator == 0) {
-        //line is parallel
-        return false;
+    if (denominator == 0)
+    {
+      // line is parallel
+      return false;
     }
 
     double r = ( (y4 - y3) * (x3 - x1) - (x4 - x3) * (y3 - y1) ) / denominator;
     double s = ( (y2 - y1) * (x3 - x1) - (x2 - x1) * (y3 - y1) ) / denominator;
 
-    if( r >= 0 && r <= 1 && s >= 0 && s <= 1) {
-        *intersect_x = x1 + r * (x2 - x1);
-        *intersect_y = y1 + r * (y2 - y1);
-        return true;
-    }else{
-        return false;
+    if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+    {
+      *intersect_x = x1 + r * (x2 - x1);
+      *intersect_y = y1 + r * (y2 - y1);
+      return true;
+    }
+    else
+    {
+      return false;
     }
 }
-}
+
+}  // namespace amathutils

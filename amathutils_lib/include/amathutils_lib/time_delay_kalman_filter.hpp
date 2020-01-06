@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef AMATHUTILS_LIB_TIME_DELAY_KALMAN_FILTER_HPP
+#define AMATHUTILS_LIB_TIME_DELAY_KALMAN_FILTER_HPP
 
 #include <iostream>
 #include <eigen3/Eigen/Core>
@@ -31,12 +32,10 @@
 class TimeDelayKalmanFilter : public KalmanFilter
 {
 public:
-
   /**
    * @brief No initialization constructor.
    */
   TimeDelayKalmanFilter();
-
 
   /**
    * @brief initialization of kalman filter
@@ -78,7 +77,9 @@ public:
                        const Eigen::MatrixXd &R, const int delay_step);
 
 private:
-  int max_delay_step_; //!< @brief maximum number of delay steps
-  int dim_x_;          //!< @brief dimension of latest state
-  int dim_x_ex_;       //!< @brief dimension of extended state with dime delay
+  int max_delay_step_;  //!< @brief maximum number of delay steps
+  int dim_x_;           //!< @brief dimension of latest state
+  int dim_x_ex_;        //!< @brief dimension of extended state with dime delay
 };
+
+#endif  // AMATHUTILS_LIB_TIME_DELAY_KALMAN_FILTER_HPP

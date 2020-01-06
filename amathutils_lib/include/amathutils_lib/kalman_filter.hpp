@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef AMATHUTILS_LIB_KALMAN_FILTER_HPP
+#define AMATHUTILS_LIB_KALMAN_FILTER_HPP
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/LU>
@@ -29,7 +30,6 @@
 class KalmanFilter
 {
 public:
-
   /**
    * @brief No initialization constructor.
    */
@@ -191,11 +191,13 @@ public:
   bool update(const Eigen::MatrixXd &y);
 
 protected:
-  Eigen::MatrixXd x_; //!< @brief current estimated state
-  Eigen::MatrixXd A_; //!< @brief coefficient matrix of x for process model x[k+1] = A*x[k] + B*u[k]
-  Eigen::MatrixXd B_; //!< @brief coefficient matrix of u for process model x[k+1] = A*x[k] + B*u[k]
-  Eigen::MatrixXd C_; //!< @brief coefficient matrix of x for measurement model y[k] = C * x[k]
-  Eigen::MatrixXd Q_; //!< @brief covariace matrix for process model x[k+1] = A*x[k] + B*u[k]
-  Eigen::MatrixXd R_; //!< @brief covariance matrix for measurement model y[k] = C * x[k]
-  Eigen::MatrixXd P_; //!< @brief covariance of estimated state
+  Eigen::MatrixXd x_;  //!< @brief current estimated state
+  Eigen::MatrixXd A_;  //!< @brief coefficient matrix of x for process model x[k+1] = A*x[k] + B*u[k]
+  Eigen::MatrixXd B_;  //!< @brief coefficient matrix of u for process model x[k+1] = A*x[k] + B*u[k]
+  Eigen::MatrixXd C_;  //!< @brief coefficient matrix of x for measurement model y[k] = C * x[k]
+  Eigen::MatrixXd Q_;  //!< @brief covariace matrix for process model x[k+1] = A*x[k] + B*u[k]
+  Eigen::MatrixXd R_;  //!< @brief covariance matrix for measurement model y[k] = C * x[k]
+  Eigen::MatrixXd P_;  //!< @brief covariance of estimated state
 };
+
+#endif  // AMATHUTILS_LIB_KALMAN_FILTER_HPP
