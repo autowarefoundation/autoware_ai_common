@@ -22,10 +22,12 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "amathutils_lib/butterworth_filter.hpp"
 
-void ButterworthFilter::Buttord(double Wp, double Ws, double Ap, double As) {
+void ButterworthFilter::Buttord(double Wp, double Ws, double Ap, double As)
+{
   /*
    *  Inputs are double Wp, Ws, Ap, As;
    *  Wp; passband frequency [rad/sc],
@@ -58,26 +60,31 @@ void ButterworthFilter::Buttord(double Wp, double Ws, double Ap, double As) {
   setCuttoffFrequency(right_lim);
 }
 
-void ButterworthFilter::initializeForFiltering() {
+void ButterworthFilter::initializeForFiltering()
+{
   // record history of filtered and unfiltered signal for applying filter
   u_unfiltered.resize(mOrder + 1, 0.0);
   u_filtered.resize(mOrder + 1, 0.0);
 }
-void ButterworthFilter::setOrder(int N) {
+void ButterworthFilter::setOrder(int N)
+{
   mOrder = N;
   initializeForFiltering();
 }
 
-void ButterworthFilter::setCuttoffFrequency(double Wc) {
+void ButterworthFilter::setCuttoffFrequency(double Wc)
+{
   mCutoff_Frequency = Wc;
 }
 
-void ButterworthFilter::setCuttoffFrequency(double fc, double fs) {
+void ButterworthFilter::setCuttoffFrequency(double fc, double fs)
+{
   /*
    * fc is the cut-off frequency in [Hz]
    * fs is the sampling frequency in [Hz]
    * */
-  if (fc >= fs / 2) {
+  if (fc >= fs / 2)
+  {
     std::cout << "\n  ERROR: Cut-off frequency  fc must be less than fs/2 \n";
     _Exit(0);
   }
@@ -86,10 +93,10 @@ void ButterworthFilter::setCuttoffFrequency(double fc, double fs) {
 }
 
 std::vector<std::complex<double>>
-ButterworthFilter::polynomialFromRoots(std::vector<std::complex<double>> &rts) {
-
+ButterworthFilter::polynomialFromRoots(std::vector<std::complex<double>> &rts)
+{
   std::vector<std::complex<double>> roots = rts;
-  std::vector<std::complex<double>> coefficients(roots.size() + 1, {0, 0});
+  std::vector<std::complex<double>> coefficients(roots.size() + 1, {0, 0});  // NOLINT
 
   int n = roots.size();
 
@@ -97,9 +104,10 @@ ButterworthFilter::polynomialFromRoots(std::vector<std::complex<double>> &rts) {
 
   // Use Vieta's Formulas to calculate polynomial coefficients
   // relates sum and products of roots to coefficients
-  for (int i = 0; i < n; i++) {
-
-    for (int j = i; j != -1; j--) {
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = i; j != -1; j--)
+    {
       coefficients[j + 1] = coefficients[j + 1] - (roots[i] * coefficients[j]);
     }
   }
@@ -107,54 +115,60 @@ ButterworthFilter::polynomialFromRoots(std::vector<std::complex<double>> &rts) {
   return coefficients;
 }
 
-void ButterworthFilter::computePhaseAngles() {
-
+void ButterworthFilter::computePhaseAngles()
+{
   mPhaseAngles.resize(mOrder);
   int i = 1;
 
-  for (auto &&x : mPhaseAngles) {
+  for (auto &&x : mPhaseAngles)
+  {
     x = M_PI_2 + (M_PI * (2.0 * i - 1.0) / (2.0 * mOrder));
     i++;
   }
 }
 
-void ButterworthFilter::computeContinuousTimeRoots(bool use_sampling_freqency) {
-
+void ButterworthFilter::computeContinuousTimeRoots(bool use_sampling_freqency)
+{
   // First compute  the phase angles of the roots
   computePhaseAngles();
 
-  mContinuousTimeRoots.resize(mOrder, {0.0, 0.0});
+  mContinuousTimeRoots.resize(mOrder, {0.0, 0.0});  // NOLINT
   int i = 0;
 
-  if (use_sampling_freqency) {
+  if (use_sampling_freqency)
+  {
     double Fc = (mSampling_Frequency / M_PI) *
                 tan(mCutoff_Frequency / (mSampling_Frequency * 2.0));
 
-    for (auto &&x : mContinuousTimeRoots) {
-      x = {cos(mPhaseAngles[i]) * Fc * 2.0 * M_PI,
-           sin(mPhaseAngles[i]) * Fc * 2.0 * M_PI};
+    for (auto &&x : mContinuousTimeRoots)
+    {
+      x = {cos(mPhaseAngles[i]) * Fc * 2.0 * M_PI,   // NOLINT
+           sin(mPhaseAngles[i]) * Fc * 2.0 * M_PI};  // NOLINT
       i++;
     }
-
-  } else {
-    for (auto &&x : mContinuousTimeRoots) {
-      x = {mCutoff_Frequency * cos(mPhaseAngles[i]),
-           mCutoff_Frequency * sin(mPhaseAngles[i])};
+  }
+  else
+  {
+    for (auto &&x : mContinuousTimeRoots)
+    {
+      x = {mCutoff_Frequency * cos(mPhaseAngles[i]),   // NOLINT
+           mCutoff_Frequency * sin(mPhaseAngles[i])};  // NOLINT
       i++;
     }
   }
 }
 
-void ButterworthFilter::computeContinuousTimeTF(bool use_sampling_freqency) {
-
+void ButterworthFilter::computeContinuousTimeTF(bool use_sampling_freqency)
+{
   computeContinuousTimeRoots(use_sampling_freqency);
-  mContinuousTimeDenominator.resize(mOrder + 1, {0.0, 0.0});
+  mContinuousTimeDenominator.resize(mOrder + 1, {0.0, 0.0});  // NOLINT
 
   mContinuousTimeDenominator = polynomialFromRoots(mContinuousTimeRoots);
   mContinuousTimeNumerator = pow(mCutoff_Frequency, mOrder);
 }
 
-void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency) {
+void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency)
+{
   /* @brief
    * This method assumes the continous time transfer function of filter has
    * already been computed and stored in the
@@ -165,8 +179,8 @@ void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency) {
   // the values by Bilinear Transformation
 
   mDiscreteTimeZeros.resize(
-      mOrder, {-1.0, 0.0}); // Butter puts zeros at -1.0 for causality
-  mDiscreteTimeRoots.resize(mOrder, {0.0, 0.0});
+      mOrder, {-1.0, 0.0}); // Butter puts zeros at -1.0 for causality  // NOLINT
+  mDiscreteTimeRoots.resize(mOrder, {0.0, 0.0});  // NOLINT
   mAn.resize(mOrder + 1, 0.0);
   mBn.resize(mOrder + 1, 0.0);
 
@@ -175,8 +189,10 @@ void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency) {
   // Bi-linear Transformation of the Roots
   int i = 0;
 
-  if (use_sampling_freqency) {
-    for (auto &&dr : mDiscreteTimeRoots) {
+  if (use_sampling_freqency)
+  {
+    for (auto &&dr : mDiscreteTimeRoots)
+    {
       dr = (1.0 + mContinuousTimeRoots[i] / (mSampling_Frequency * 2.0)) /
            (1.0 - mContinuousTimeRoots[i] / (mSampling_Frequency * 2.0));
       i++;
@@ -192,29 +208,36 @@ void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency) {
     std::complex<double> sum_num{0.0, 0.0};
     std::complex<double> sum_den{0.0, 0.0};
 
-    for (auto &n : mDiscreteTimeNumerator) {
+    for (auto &n : mDiscreteTimeNumerator)
+    {
       sum_num += n;
     }
 
-    for (auto &n : mDiscreteTimeDenominator) {
+    for (auto &n : mDiscreteTimeDenominator)
+    {
       sum_den += n;
     }
 
     mDiscreteTimeGain = (sum_den / sum_num);
 
-    for (auto &&dn : mDiscreteTimeNumerator) {
+    for (auto &&dn : mDiscreteTimeNumerator)
+    {
       dn = dn * mDiscreteTimeGain;
       mBn[i] = dn.real();
       i++;
     }
 
     i = 0;
-    for (auto &&dd : mDiscreteTimeDenominator) {
+    for (auto &&dd : mDiscreteTimeDenominator)
+    {
       mAn[i] = dd.real();
       i++;
     }
-  } else {
-    for (auto &&dr : mDiscreteTimeRoots) {
+  }
+  else
+  {
+    for (auto &&dr : mDiscreteTimeRoots)
+    {
       dr = (1.0 + 2.0 * mContinuousTimeRoots[i] / 2.0) /
            (1.0 - Td * mContinuousTimeRoots[i] / 2.0);
 
@@ -228,29 +251,31 @@ void ButterworthFilter::computeDiscreteTimeTF(bool use_sampling_freqency) {
     i = 0;
     mDiscreteTimeNumerator = polynomialFromRoots(mDiscreteTimeZeros);
 
-    for (auto &&dn : mDiscreteTimeNumerator) {
+    for (auto &&dn : mDiscreteTimeNumerator)
+    {
       dn = dn * mDiscreteTimeGain;
       mBn[i] = dn.real();
       i++;
     }
 
     i = 0;
-    for (auto &&dd : mDiscreteTimeDenominator) {
+    for (auto &&dd : mDiscreteTimeDenominator)
+    {
       mAn[i] = dd.real();
       i++;
     }
   }
 }
 
-Order_Cutoff ButterworthFilter::getOrderCutOff() {
-
+Order_Cutoff ButterworthFilter::getOrderCutOff()
+{
   Order_Cutoff NWc{mOrder, mCutoff_Frequency};
 
   return NWc;
 }
 
-DifferenceAnBn ButterworthFilter::getAnBn() {
-
+DifferenceAnBn ButterworthFilter::getAnBn()
+{
   //    DifferenceAnBn AnBn;
   //    AnBn.An.resize(mAn.size(), 0.0);
   //    AnBn.Bn.resize(mBn.size(), 0.0);
@@ -263,11 +288,18 @@ DifferenceAnBn ButterworthFilter::getAnBn() {
   return AnBn;
 }
 
-std::vector<double> ButterworthFilter::getAn() { return mAn; }
+std::vector<double> ButterworthFilter::getAn()
+{
+  return mAn;
+}
 
-std::vector<double> ButterworthFilter::getBn() { return mBn; }
+std::vector<double> ButterworthFilter::getBn()
+{
+  return mBn;
+}
 
-void ButterworthFilter::PrintFilter_Specs() {
+void ButterworthFilter::PrintFilter_Specs()
+{
   /*
    * Prints the order and cut-off angular frequency (rad/sec) of the filter
    *
@@ -277,7 +309,8 @@ void ButterworthFilter::PrintFilter_Specs() {
             << std::endl;
 }
 
-void ButterworthFilter::PrintFilter_ContinuousTimeRoots() {
+void ButterworthFilter::PrintFilter_ContinuousTimeRoots()
+{
   /*
    * Prints the order and cut-off angular frequency (rad/sec) of the filter
    * */
@@ -285,14 +318,15 @@ void ButterworthFilter::PrintFilter_ContinuousTimeRoots() {
                "Denominator are : "
             << std::endl;
 
-  for (auto &&x : mContinuousTimeRoots) {
+  for (auto &&x : mContinuousTimeRoots)
+  {
     std::cout << std::real(x) << " + j " << std::imag(x) << std::endl;
   }
   std::cout << std::endl;
 }
 
-void ButterworthFilter::PrintContinuousTimeTF() {
-
+void ButterworthFilter::PrintContinuousTimeTF()
+{
   int n = mOrder;
 
   std::cout << "\nThe Continuous Time Transfer Function of the Filter is ;\n"
@@ -300,14 +334,15 @@ void ButterworthFilter::PrintContinuousTimeTF() {
 
   std::cout << "         " << mContinuousTimeNumerator << std::endl;
 
-  for (int i = 0; i <= n; i++) {
+  for (int i = 0; i <= n; i++)
+  {
     std::cout << "--------";
   }
 
   std::cout << "--------\n";
 
-  for (int i = n; i > 0; i--) {
-
+  for (int i = n; i > 0; i--)
+  {
     std::cout << mContinuousTimeDenominator[n - i].real() << " * ";
     std::cout << "z[-" << i << "] + ";
   }
@@ -315,27 +350,29 @@ void ButterworthFilter::PrintContinuousTimeTF() {
   std::cout << mContinuousTimeDenominator[n].real() << std::endl;
 }
 
-void ButterworthFilter::PrintDiscreteTimeTF() {
-
+void ButterworthFilter::PrintDiscreteTimeTF()
+{
   int n = mOrder;
   std::cout << "\nThe Discrete Time Transfer Function of the Filter is ;\n"
             << std::endl;
 
-  for (int i = n; i > 0; i--) {
-
+  for (int i = n; i > 0; i--)
+  {
     std::cout << mDiscreteTimeNumerator[n - i].real() << " * ";
     std::cout << "z[-" << i << "] + ";
   }
+
   std::cout << mDiscreteTimeNumerator[n].real() << std::endl;
 
-  for (int i = 0; i <= n; i++) {
+  for (int i = 0; i <= n; i++)
+  {
     std::cout << "--------";
   }
 
   std::cout << "--------\n";
 
-  for (int i = n; i > 0; i--) {
-
+  for (int i = n; i > 0; i--)
+  {
     std::cout << mDiscreteTimeDenominator[n - i].real() << " * ";
     std::cout << "z[-" << i << "] + ";
   }
@@ -344,20 +381,25 @@ void ButterworthFilter::PrintDiscreteTimeTF() {
   std::cout << std::endl;
 }
 
-double ButterworthFilter::filter(const double &u) {
-
+double ButterworthFilter::filter(const double &u)
+{
   double u_f = 0.0;
 
-  for (int i = 0; i < mOrder + 1; i++) {
+  for (int i = 0; i < mOrder + 1; i++)
+  {
     if (i == 0)
+    {
       u_f += mBn[0] * u;
-    else {
+    }
+    else
+    {
       u_f += mBn[i] * u_unfiltered[i];
       u_f -= mAn[i] * u_filtered[i];
     }
   }
 
-  for (int i = mOrder; i >= 2; i--) {
+  for (int i = mOrder; i >= 2; i--)
+  {
     u_unfiltered[i] = u_unfiltered[i - 1];
     u_filtered[i] = u_filtered[i - 1];
   }
@@ -369,12 +411,14 @@ double ButterworthFilter::filter(const double &u) {
 
 void ButterworthFilter::filtVector(const std::vector<double> &t,
                                    std::vector<double> &u,
-                                   bool init_first_value) {
-
+                                   bool init_first_value)
+{
   // initialise trace values to 1st value
 
-  if (init_first_value) {
-    for (int i = 0; i < mOrder + 1; i++) {
+  if (init_first_value)
+  {
+    for (int i = 0; i < mOrder + 1; i++)
+    {
       u_unfiltered[i] = t[0];
       u_filtered[i] = t[0];
     }
@@ -386,8 +430,8 @@ void ButterworthFilter::filtVector(const std::vector<double> &t,
 
 void ButterworthFilter::filtFiltVector(const std::vector<double> &t,
                                        std::vector<double> &u,
-                                       bool init_first_value) {
-
+                                       bool init_first_value)
+{
   std::vector<double> u_rev(u);
 
   // forward filtering
@@ -399,7 +443,8 @@ void ButterworthFilter::filtFiltVector(const std::vector<double> &t,
   std::reverse(u_rev.begin(), u_rev.end());
 
   // merge
-  for (unsigned int i = 0; i < u.size(); ++i) {
+  for (unsigned int i = 0; i < u.size(); ++i)
+  {
     u[i] = (u[i] + u_rev[i]) * 0.5;
   }
 }

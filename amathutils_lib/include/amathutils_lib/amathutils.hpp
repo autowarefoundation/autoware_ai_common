@@ -1,5 +1,21 @@
-#ifndef __AMATHUTILS_HPP
-#define __AMATHUTILS_HPP
+/*
+ * Copyright 2018-2019 Autoware Foundation. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef AMATHUTILS_LIB_AMATHUTILS_HPP
+#define AMATHUTILS_LIB_AMATHUTILS_HPP
 
 #include <cmath>
 #include <iostream>
@@ -13,6 +29,7 @@
 
 namespace amathutils
 {
+
 #define G_MPSS 9.80665  // m/s^2
 
 inline double rad2deg(double _angle)
@@ -49,8 +66,10 @@ inline double getTimefromAcceleration(double _v0, double _v, double _a)
   return (_v - _v0) / _a;
 }
 
-bool getIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double* intersect_x, double* intersect_y );
-bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3, geometry_msgs::Point p4, geometry_msgs::Point* intersect);
+bool getIntersect(double x1, double y1, double x2, double y2, double x3,
+  double y3, double x4, double y4, double* intersect_x, double* intersect_y);
+bool getIntersect(geometry_msgs::Point p1, geometry_msgs::Point p2, geometry_msgs::Point p3,
+  geometry_msgs::Point p4, geometry_msgs::Point* intersect);
 
 geometry_msgs::Point getNearPtOnLine(const geometry_msgs::Point &_p, const geometry_msgs::Point &_a,
                                      const geometry_msgs::Point &_b);
@@ -58,9 +77,9 @@ double find_distance(const geometry_msgs::Point &_from, const geometry_msgs::Poi
 double find_distance(const geometry_msgs::Pose &_from, const geometry_msgs::Pose &_to);
 double find_angle(const geometry_msgs::Point &_from, const geometry_msgs::Point &_to);
 bool isIntersectLine(const geometry_msgs::Point &_l1_p1, const geometry_msgs::Point &_l1_p2,
-                     const geometry_msgs::Point &_l2_p1, const geometry_msgs::Point &_l2_p2);
+  const geometry_msgs::Point &_l2_p1, const geometry_msgs::Point &_l2_p2);
 int isPointLeftFromLine(const geometry_msgs::Point &_target, const geometry_msgs::Point &_line_p1,
-                        const geometry_msgs::Point &_line_p2);
+  const geometry_msgs::Point &_line_p2);
 
 /**
  * @fn distanceFromSegment
@@ -70,7 +89,8 @@ int isPointLeftFromLine(const geometry_msgs::Point &_target, const geometry_msgs
  * @param  _p   the point to find distance
  * @return distance between point _p and line segment(_l1,_l2) 
  */
-double distanceFromSegment( const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2, const geometry_msgs::Point &_p);
+double distanceFromSegment(const geometry_msgs::Point &_l1, const geometry_msgs::Point &_l2,
+  const geometry_msgs::Point &_p);
 double getPoseYawAngle(const geometry_msgs::Pose &_pose);
 
 /**
@@ -90,5 +110,7 @@ double normalizeRadian(const double _angle);
 double calcPosesAngleDiffRaw(const geometry_msgs::Pose &p_from, const geometry_msgs::Pose &_p_to);
 double calcPosesAngleDiffDeg(const geometry_msgs::Pose &_p_from, const geometry_msgs::Pose &_p_to);
 double calcPosesAngleDiffRad(const geometry_msgs::Pose &_p_from, const geometry_msgs::Pose &_p_to);
-}
-#endif
+
+}  // namespace amathutils
+
+#endif  // AMATHUTILS_LIB_AMATHUTILS_HPP

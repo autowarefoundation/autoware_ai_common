@@ -16,27 +16,27 @@
  * Authors: Ali Boyali, Simon Thompson
  */
 
-#ifndef BUTTERWORTH_FILTER_H
-#define BUTTERWORTH_FILTER_H
-
-#pragma once
+#ifndef AMATHUTILS_LIB_BUTTERWORTH_FILTER_HPP
+#define AMATHUTILS_LIB_BUTTERWORTH_FILTER_HPP
 
 #include <cmath>
 #include <complex>
 #include <vector>
 
-struct Order_Cutoff {
+struct Order_Cutoff
+{
   int N;
   double Wc;
 };
 
-struct DifferenceAnBn {
+struct DifferenceAnBn
+{
   std::vector<double> An;
   std::vector<double> Bn;
 };
 
-class ButterworthFilter {
-
+class ButterworthFilter
+{
 public:
   // Prints the filter order and cutoff frequency
 
@@ -53,7 +53,7 @@ public:
 
   // Setters and Getters
   void
-  setCuttoffFrequency(double Wc); // Wc is the cut-off frequency in [rad/sec]
+  setCuttoffFrequency(double Wc);  // Wc is the cut-off frequency in [rad/sec]
 
   // fc is cut-off frequency in [Hz] and fs is the sampling frequency in [Hz]
   void setCuttoffFrequency(double fc, double fs);
@@ -79,10 +79,8 @@ public:
                       bool init_first_value = true);
 
 private:
-  // member variables
-
-  int mOrder = 0;                 // filter order
-  double mCutoff_Frequency = 0.0; // filter cut-off frequency [rad/sec]
+  int mOrder = 0;                  // filter order
+  double mCutoff_Frequency = 0.0;  // filter cut-off frequency [rad/sec]
 
   // Boolean parameter when a sampling frequency is defined. Default is false
   bool prewarp = false;
@@ -140,4 +138,4 @@ private:
   std::vector<double> u_filtered;
 };
 
-#endif
+#endif  // AMATHUTILS_LIB_BUTTERWORTH_FILTER_HPP

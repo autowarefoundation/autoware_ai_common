@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018-2019 Autoware Foundation. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "amathutils_lib/amathutils.hpp"
 #include <ros/ros.h>
 #include <gtest/gtest.h>
@@ -5,40 +21,48 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 
-class TestSuite: public ::testing::Test {
+class TestSuite:
+  public ::testing::Test
+{
 public:
-  TestSuite(){}
-  ~TestSuite(){}
+  TestSuite() {}
 };
 
-TEST(TestSuite, Rad2Deg){
+TEST(TestSuite, Rad2Deg)
+{
   double radAngle = 1;
   ASSERT_EQ(amathutils::rad2deg(radAngle), radAngle*180/M_PI) << "Angle in degrees should be " << radAngle*180/M_PI;
 }
 
-TEST(TestSuite, Deg2Rad){
+TEST(TestSuite, Deg2Rad)
+{
   double degAngle = 10;
   ASSERT_EQ(amathutils::deg2rad(degAngle), degAngle*M_PI/180) << "Angle in radians should be " << degAngle*M_PI/180;
 }
 
 // Value from https://www.google.com/search?client=ubuntu&channel=fs&q=mps+to+kph&ie=utf-8&oe=utf-8
-TEST(TestSuite, Transform_mps2kph){
+TEST(TestSuite, Transform_mps2kph)
+{
   double mpsValue = 1;
   ASSERT_DOUBLE_EQ(amathutils::mps2kmph(mpsValue), mpsValue*3.6) << "Speed should be " << mpsValue*3.6 << "kmph";
 }
 
 // Value from https://www.google.com/search?client=ubuntu&channel=fs&q=kph+to+mps&ie=utf-8&oe=utf-8
-TEST(TestSuite, Transform_kmph2mps){
+TEST(TestSuite, Transform_kmph2mps)
+{
   double kmphValue = 1;
   ASSERT_DOUBLE_EQ(amathutils::kmph2mps(kmphValue), kmphValue/3.6) << "Speed should be " << kmphValue/3.6 << "mps";
 }
 
-TEST(TestSuite, GetGravityAcceleration){
+TEST(TestSuite, GetGravityAcceleration)
+{
   double accel = 10.8;
-  ASSERT_DOUBLE_EQ(amathutils::getGravityAcceleration(accel), accel/G_MPSS) << "Acceleration should be " << accel/G_MPSS << "g";
+  ASSERT_DOUBLE_EQ(amathutils::getGravityAcceleration(accel), accel/G_MPSS)
+    << "Acceleration should be " << accel/G_MPSS << "g";
 }
 
-TEST(TestSuite, GetAcceleration){
+TEST(TestSuite, GetAcceleration)
+{
   double accel = 5.5;
   double t = 2;
   double v0 = 2.5;
@@ -47,7 +71,8 @@ TEST(TestSuite, GetAcceleration){
   ASSERT_DOUBLE_EQ(amathutils::getAcceleration(v0, v, x), accel) << "Acceleration should be " << accel;
 }
 
-TEST(TestSuite, GetTimeFromAcceleration){
+TEST(TestSuite, GetTimeFromAcceleration)
+{
   double accel = 0.5;
   double t = 2.8;
   double v0 = 2;
@@ -56,7 +81,8 @@ TEST(TestSuite, GetTimeFromAcceleration){
 }
 
 // Values taken from https://gerardnico.com/linear_algebra/closest_point_line - Example 5.4
-TEST(TestSuite, GetNearPointOnLine2D){
+TEST(TestSuite, GetNearPointOnLine2D)
+{
   geometry_msgs::Point a, b, p, nearPOut, nearP;
 
   a.x = 0;
@@ -80,11 +106,11 @@ TEST(TestSuite, GetNearPointOnLine2D){
   ASSERT_DOUBLE_EQ(nearPOut.x, nearP.x) << "nearPoint coordinate X should be " << nearP.x;
   ASSERT_DOUBLE_EQ(nearPOut.y, nearP.y) << "nearPoint coordinate X should be " << nearP.y;
   ASSERT_DOUBLE_EQ(nearPOut.z, nearP.z) << "nearPoint coordinate X should be " << nearP.z;
-
 }
 
 // Values taken from https://math.stackexchange.com/questions/13176/how-to-find-a-point-on-a-line-closest-to-another-given-point
-TEST(TestSuite, GetNearPointOnLine3D){
+TEST(TestSuite, GetNearPointOnLine3D)
+{
   geometry_msgs::Point a, b, p, nearPOut, nearP;
   double threshold = 0.00000001;
 
@@ -112,8 +138,8 @@ TEST(TestSuite, GetNearPointOnLine3D){
 }
 
 // Values from http://www.math.usm.edu/lambers/mat169/fall09/lecture17.pdf - The Distance Formula
-TEST(TestSuite, GetDistance){
-
+TEST(TestSuite, GetDistance)
+{
   geometry_msgs::Point ptA, ptB;
   geometry_msgs::Pose poseA, poseB;
 
@@ -133,13 +159,15 @@ TEST(TestSuite, GetDistance){
   poseB.position.y = -5;
   poseB.position.z = 0;
 
-  ASSERT_DOUBLE_EQ(amathutils::find_distance(ptA, ptB), sqrt(101)) << "Distance between points should be " << sqrt(101);
-  ASSERT_DOUBLE_EQ(amathutils::find_distance(poseA, poseB), sqrt(101)) << "Distance between poses should be " << sqrt(101);
+  ASSERT_DOUBLE_EQ(amathutils::find_distance(ptA, ptB), sqrt(101))
+    << "Distance between points should be " << sqrt(101);
+  ASSERT_DOUBLE_EQ(amathutils::find_distance(poseA, poseB), sqrt(101))
+    << "Distance between poses should be " << sqrt(101);
 }
 
 // Values from https://math.stackexchange.com/questions/707673/find-angle-in-degrees-from-one-point-to-another-in-2d-space
-TEST(TestSuite, GetAngle){
-
+TEST(TestSuite, GetAngle)
+{
   geometry_msgs::Point ptA, ptB;
 
   ptA.x = 0;
@@ -155,8 +183,8 @@ TEST(TestSuite, GetAngle){
 }
 
 // Values from https://www.mathopenref.com/coordintersection.html
-TEST(TestSuite, LineIntersect){
-
+TEST(TestSuite, LineIntersect)
+{
   geometry_msgs::Point l1_p1, l1_p2, l2_p1, l2_p2;
   l1_p1.x = 29;
   l1_p1.y = 5;
@@ -175,8 +203,8 @@ TEST(TestSuite, LineIntersect){
 }
 
 // Values from https://www.mathopenref.com/coordintersection.html
-TEST(TestSuite, ParallelLines){
-
+TEST(TestSuite, ParallelLines)
+{
   geometry_msgs::Point l1_p1, l1_p2, l2_p1, l2_p2;
   l1_p1.x = 29;
   l1_p1.y = 5;
@@ -199,8 +227,8 @@ TEST(TestSuite, ParallelLines){
 #define ONLINE 0
 
 // 45degree angle line through the origin (0,0)
-TEST(TestSuite, PointOnTheLeft){
-
+TEST(TestSuite, PointOnTheLeft)
+{
   geometry_msgs::Point p1, line_p1, line_p2;
   p1.x = 1;
   p1.y = 10;
@@ -216,8 +244,8 @@ TEST(TestSuite, PointOnTheLeft){
 }
 
 // 45degree angle line through the origin (0,0)
-TEST(TestSuite, PointOnTheRight){
-
+TEST(TestSuite, PointOnTheRight)
+{
   geometry_msgs::Point p1, line_p1, line_p2;
   p1.x = 10;
   p1.y = 1;
@@ -233,8 +261,8 @@ TEST(TestSuite, PointOnTheRight){
 }
 
 // 45degree angle line through the origin (0,0)
-TEST(TestSuite, PointOnTheLine){
-
+TEST(TestSuite, PointOnTheLine)
+{
   geometry_msgs::Point p1, line_p1, line_p2;
   p1.x = -5;
   p1.y = -5;
@@ -249,7 +277,8 @@ TEST(TestSuite, PointOnTheLine){
   ASSERT_EQ(amathutils::isPointLeftFromLine(p1, line_p1, line_p2), ONLINE) << "Point is on the line ";
 }
 // Point between p1, p2
-TEST(TestSuite, DistanceFromSegment1){
+TEST(TestSuite, DistanceFromSegment1)
+{
   geometry_msgs::Point p, line_p1, line_p2;
   p.x = 1;
   p.y = 1;
@@ -261,11 +290,12 @@ TEST(TestSuite, DistanceFromSegment1){
   line_p2.y = 0;
   line_p2.z = 0;
 
-  ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment( line_p1, line_p2, p), 1.0) << "Point is 1m away from segment";
+  ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment(line_p1, line_p2, p), 1.0) << "Point is 1m away from segment";
 }
 
 // Point 2m away from p1
-TEST(TestSuite, DistanceFromSegment2){
+TEST(TestSuite, DistanceFromSegment2)
+{
   geometry_msgs::Point p, line_p1, line_p2;
   p.x = -2;
   p.y = 0;
@@ -281,7 +311,8 @@ TEST(TestSuite, DistanceFromSegment2){
 }
 
 // Point 3m away from p2
-TEST(TestSuite, DistanceFromSegment3){
+TEST(TestSuite, DistanceFromSegment3)
+{
   geometry_msgs::Point p, line_p1, line_p2;
   p.x = 5;
   p.y = 0;
@@ -296,35 +327,35 @@ TEST(TestSuite, DistanceFromSegment3){
   ASSERT_DOUBLE_EQ(amathutils::distanceFromSegment(line_p1, line_p2, p), 3.0) << "Point is 3m away from p1";
 }
 
-TEST(TestSuite, TestYawQuaternion){
-
-    geometry_msgs::Quaternion q;
-    q = amathutils::getQuaternionFromYaw(0.0);
-    ASSERT_DOUBLE_EQ(0.0, q.x);
-    ASSERT_DOUBLE_EQ(0.0, q.y);
-    ASSERT_DOUBLE_EQ(0.0, q.z);
-    ASSERT_DOUBLE_EQ(1.0, q.w);
+TEST(TestSuite, TestYawQuaternion)
+{
+  geometry_msgs::Quaternion q;
+  q = amathutils::getQuaternionFromYaw(0.0);
+  ASSERT_DOUBLE_EQ(0.0, q.x);
+  ASSERT_DOUBLE_EQ(0.0, q.y);
+  ASSERT_DOUBLE_EQ(0.0, q.z);
+  ASSERT_DOUBLE_EQ(1.0, q.w);
 }
-
 
 TEST(TestSuite, TestNormalizeRadian)
 {
-    ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(0.0));
-    ASSERT_DOUBLE_EQ(0.5, amathutils::normalizeRadian(0.5));
-    ASSERT_DOUBLE_EQ(-0.5, amathutils::normalizeRadian(-0.5));
-    ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(2.0 * M_PI));
-    ASSERT_DOUBLE_EQ(0.3, amathutils::normalizeRadian(2.0 * M_PI + 0.3));
-    ASSERT_DOUBLE_EQ(M_PI, amathutils::normalizeRadian(3.0 * M_PI));
-    ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(4.0 * M_PI));
-    ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(-2.0 * M_PI));
-    ASSERT_DOUBLE_EQ(0.3, amathutils::normalizeRadian(-2.0 * M_PI + 0.3));
-    ASSERT_DOUBLE_EQ(-M_PI, amathutils::normalizeRadian(-3.0 * M_PI));
-    ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(-4.0 * M_PI));
-    ASSERT_DOUBLE_EQ(M_PI, amathutils::normalizeRadian(M_PI));
-    ASSERT_DOUBLE_EQ(-M_PI, amathutils::normalizeRadian(-M_PI));
+  ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(0.0));
+  ASSERT_DOUBLE_EQ(0.5, amathutils::normalizeRadian(0.5));
+  ASSERT_DOUBLE_EQ(-0.5, amathutils::normalizeRadian(-0.5));
+  ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(2.0 * M_PI));
+  ASSERT_DOUBLE_EQ(0.3, amathutils::normalizeRadian(2.0 * M_PI + 0.3));
+  ASSERT_DOUBLE_EQ(M_PI, amathutils::normalizeRadian(3.0 * M_PI));
+  ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(4.0 * M_PI));
+  ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(-2.0 * M_PI));
+  ASSERT_DOUBLE_EQ(0.3, amathutils::normalizeRadian(-2.0 * M_PI + 0.3));
+  ASSERT_DOUBLE_EQ(-M_PI, amathutils::normalizeRadian(-3.0 * M_PI));
+  ASSERT_DOUBLE_EQ(0.0, amathutils::normalizeRadian(-4.0 * M_PI));
+  ASSERT_DOUBLE_EQ(M_PI, amathutils::normalizeRadian(M_PI));
+  ASSERT_DOUBLE_EQ(-M_PI, amathutils::normalizeRadian(-M_PI));
 }
 
-TEST(TestSuite, TestGetIntersect){
+TEST(TestSuite, TestGetIntersect)
+{
   geometry_msgs::Point line1_p1, line1_p2, line2_p1, line2_p2, intersect_p;
   line1_p1.x = 5;
   line1_p1.y = 0;
@@ -334,13 +365,14 @@ TEST(TestSuite, TestGetIntersect){
   line2_p1.y = 5;
   line2_p2.x = 10;
   line2_p2.y = 5;
-  
+
   ASSERT_TRUE(amathutils::getIntersect(line1_p1, line1_p2, line2_p1, line2_p2, &intersect_p));
   ASSERT_DOUBLE_EQ(5, intersect_p.x);
   ASSERT_DOUBLE_EQ(5, intersect_p.y);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "TestNode");
   return RUN_ALL_TESTS();
