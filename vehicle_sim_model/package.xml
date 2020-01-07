@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vehicle_sim_model</name>
+  <version>1.13.0</version>
+  <description>The vehicle_sim_model package</description>
+  <maintainer email="horibe.takamasa@gmail.com">Takamasa HORIBE</maintainer>
+  <author email="horibe.takamasa@gmail.com">Takamasa HORIBE</author>
+
+  <license>Apache 2</license>
+
+  <buildtool_depend>autoware_build_flags</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>roslint</depend>
+  <exec_depend>python-numpy</exec_depend>
+  <exec_depend>python-pandas</exec_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
+</package>
