@@ -1,0 +1,5 @@
+<launch>
+
+  <test test-name="test-vehicle_sim_model" pkg="vehicle_sim_model" type="test-vehicle_sim_model" name="test" time-limit="300.0"/>
+
+</launch>
