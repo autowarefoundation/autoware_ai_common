@@ -20,9 +20,6 @@
 #define EIGEN_MPL2_ONLY
 #include <tf/transform_datatypes.h>
 #include <tf2/utils.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 
 // C++ header
 #include <iostream>

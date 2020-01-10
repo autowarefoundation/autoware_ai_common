@@ -20,6 +20,8 @@
 #include <limits>
 #include <utility>
 #include <vector>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 void PurePursuit::setUseLerp(bool ul) { use_lerp_ = ul; }
 
