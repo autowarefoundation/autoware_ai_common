@@ -28,43 +28,73 @@ HealthChecker::HealthChecker(ros::NodeHandle nh, ros::NodeHandle pnh)
   , node_activated_(false)
   , nh_(nh)
   , pnh_(pnh)
+  , is_shutdown_(false)
 {
   status_pub_ =
     nh_.advertise<autoware_system_msgs::NodeStatus>("node_status", 10);
 }
 
-void HealthChecker::publishStatus(const ros::TimerEvent& event)
+HealthChecker::~HealthChecker()
 {
-  std::lock_guard<std::mutex> lock(mtx_);
-  autoware_system_msgs::NodeStatus status;
-  status.node_activated = node_activated_;
-  ros::Time now = ros::Time::now();
-  status.header.stamp = now;
-  status.node_name = ros::this_node::getName();
-  const auto checker_keys = getRateCheckerKeys();
-  // iterate Rate checker and publish rate_check result
-  for (const auto& key : checker_keys)
+  is_shutdown_.store(true);
+  if (node_status_publish_thread_.joinable())
   {
-    const auto result = rate_checkers_[key]->getErrorLevelAndRate();
-    if (result)
+    node_status_publish_thread_.join();
+  }
+}
+
+void HealthChecker::publishStatus()
+{
+  const int loop_usec =
+    std::round(1.0 / autoware_health_checker::NODE_STATUS_UPDATE_RATE * 1e6);
+  const std::string node_name = ros::this_node::getName();
+
+  auto prev_time = std::chrono::system_clock::now();
+  ros::Time prev_ros_time = ros::Time::now();
+  while (ros::ok() && !is_shutdown_.load())
+  {
+    const auto until_time = prev_time + std::chrono::microseconds(loop_usec);
+    std::this_thread::sleep_until(until_time);
+    prev_time = until_time;
+    // Pause publish if time is stopped in simulation mode.
+    const ros::Time now = ros::Time::now();
+    if (prev_ros_time == now)
     {
-      AwDiagStatusArray diag_array;
-      AwDiagStatus diag = setValueCommon(
-        key, result->second, rate_checkers_.at(key)->description);
-      diag.header.stamp = now;
-      diag.level = result->first;
-      diag.type = AwDiagStatus::UNEXPECTED_RATE;
-      diag_array.status.emplace_back(diag);
-      status.status.emplace_back(diag_array);
+      continue;
     }
+    prev_ros_time = now;
+
+    autoware_system_msgs::NodeStatus status;
+    status.node_name = node_name;
+
+    status.node_activated = node_activated_;
+    status.header.stamp = now;
+    std::lock_guard<std::mutex> lock(mtx_);
+    const auto checker_keys = getRateCheckerKeys();
+    // iterate Rate checker and publish rate_check result
+    for (const auto& key : checker_keys)
+    {
+      const auto result = rate_checkers_[key]->getErrorLevelAndRate();
+      if (result)
+      {
+        AwDiagStatusArray diag_array;
+        AwDiagStatus diag = setValueCommon(
+          key, result->second, rate_checkers_.at(key)->description);
+        diag.header.stamp = now;
+        diag.level = result->first;
+        diag.type = AwDiagStatus::UNEXPECTED_RATE;
+        diag_array.status.emplace_back(diag);
+        status.status.emplace_back(diag_array);
+      }
+    }
+    // iterate Diagnostic Buffer and publish all diagnostic data
+    const auto keys = getKeys();
+    for (const auto& key : keys)
+    {
+      status.status.emplace_back(diag_buffers_.at(key)->getAndClearData());
+    }
+    status_pub_.publish(status);
   }
-  // iterate Diagnostic Buffer and publish all diagnostic data
-  const auto keys = getKeys();
-  for (const auto& key : keys)
-  {
-    status.status.emplace_back(diag_buffers_[key]->getAndClearData());
-  }
-  status_pub_.publish(status);
 }
 
 ErrorLevel HealthChecker::SET_DIAG_STATUS(
@@ -84,8 +114,9 @@ ErrorLevel HealthChecker::SET_DIAG_STATUS(
   {
     return AwDiagStatus::UNDEFINED;
   }
+  std::lock_guard<std::mutex> lock(mtx_);
   addNewBuffer(status.key, status.type, status.description);
-  diag_buffers_[status.key]->addDiag(status);
+  diag_buffers_.at(status.key)->addDiag(status);
   return status.level;
 }
 
@@ -106,9 +137,7 @@ ErrorLevel HealthChecker::CHECK_TRUE(
 
 void HealthChecker::ENABLE()
 {
-  ros::Duration duration(
-    1.0 / autoware_health_checker::NODE_STATUS_UPDATE_RATE);
-  timer_ = nh_.createTimer(duration, &HealthChecker::publishStatus, this);
+  node_status_publish_thread_ = std::thread(&HealthChecker::publishStatus, this);
 }
 
 std::vector<ErrorKey> HealthChecker::getKeys()
@@ -145,7 +174,6 @@ bool HealthChecker::keyExist(const ErrorKey& key) const
 bool HealthChecker::addNewBuffer(
   const ErrorKey& key, const ErrorType type, const std::string& description)
 {
-  std::lock_guard<std::mutex> lock(mtx_);
   if (keyExist(key))
   {
     return false;
@@ -241,6 +269,7 @@ void HealthChecker::CHECK_RATE(const ErrorKey& key,
   {
     return;
   }
+  std::lock_guard<std::mutex> lock(mtx_);
   if (!keyExist(key))
   {
     value_manager_.setDefaultValue(

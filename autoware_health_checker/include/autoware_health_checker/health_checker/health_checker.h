@@ -37,6 +37,9 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <thread>
+#include <atomic>
+#include <chrono>
 
 // headers in boost
 #include <boost/bind.hpp>
@@ -54,6 +57,7 @@ public:
   using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
   using AwDiagStatusArray = autoware_system_msgs::DiagnosticStatusArray;
   HealthChecker(ros::NodeHandle nh, ros::NodeHandle pnh);
+  ~HealthChecker();
   void ENABLE();
   ErrorLevel CHECK_MIN_VALUE(const ErrorKey& key, const double value,
     const double warn_value, const double error_value,
@@ -115,7 +119,7 @@ private:
   std::vector<ErrorKey> getRateCheckerKeys();
   ros::NodeHandle nh_;
   ros::NodeHandle pnh_;
-  ros::Timer timer_;
+  std::thread node_status_publish_thread_;
   ValueManager value_manager_;
   std::map<ErrorKey, std::unique_ptr<DiagBuffer>> diag_buffers_;
   std::map<ErrorKey, std::unique_ptr<RateChecker>> rate_checkers_;
@@ -134,8 +138,9 @@ private:
     write_json(ss, pt);
     return ss.str();
   }
-  void publishStatus(const ros::TimerEvent& event);
+  void publishStatus();
   bool node_activated_;
+  std::atomic<bool> is_shutdown_;
   std::mutex mtx_;
 };
 }  // namespace autoware_health_checker
