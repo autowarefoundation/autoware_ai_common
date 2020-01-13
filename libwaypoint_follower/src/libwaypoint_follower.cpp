@@ -19,6 +19,9 @@
 #include <limits>
 #include <utility>
 #include <vector>
+#include <tf2_eigen/tf2_eigen.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 int WayPoints::getSize() const
 {

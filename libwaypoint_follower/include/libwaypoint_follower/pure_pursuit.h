@@ -18,8 +18,6 @@
 #define LIBWAYPOINT_FOLLOWER_PURE_PURSUIT_H
 
 #define EIGEN_MPL2_ONLY
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 
 // ROS includes
 #include <geometry_msgs/Pose.h>
