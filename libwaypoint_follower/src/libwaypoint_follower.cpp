@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-#include "libwaypoint_follower/libwaypoint_follower.h"
-
+#include <cmath>
 #include <limits>
 #include <utility>
 #include <vector>
+
+#include <amathutils_lib/amathutils.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
+#include "libwaypoint_follower/libwaypoint_follower.h"
+
+using amathutils::deg2rad;
 
 int WayPoints::getSize() const
 {
@@ -93,7 +98,7 @@ bool WayPoints::inDrivingDirection(int waypoint, geometry_msgs::Pose current_pos
 double DecelerateVelocity(double distance, double prev_velocity)
 {
   double decel_ms = 1.0;  // m/s
-  double decel_velocity_ms = sqrt(2 * decel_ms * distance);
+  double decel_velocity_ms = std::sqrt(2 * decel_ms * distance);
 
   std::cout << "velocity/prev_velocity :" << decel_velocity_ms << "/" << prev_velocity << std::endl;
   if (decel_velocity_ms < prev_velocity)
@@ -273,7 +278,7 @@ bool getLinearEquation(geometry_msgs::Point start, geometry_msgs::Point end, dou
   // (x1, y1) = (start.x, star.y), (x2, y2) = (end.x, end.y)
   double sub_x = std::fabs(start.x - end.x);
   double sub_y = std::fabs(start.y - end.y);
-  double error = pow(10, -5);  // 0.00001
+  double error = std::pow(10, -5);  // 0.00001
 
   if (sub_x < error && sub_y < error)
   {
@@ -289,7 +294,7 @@ bool getLinearEquation(geometry_msgs::Point start, geometry_msgs::Point end, dou
 }
 double getDistanceBetweenLineAndPoint(geometry_msgs::Point point, double a, double b, double c)
 {
-  double d = std::fabs(a * point.x + b * point.y + c) / sqrt(pow(a, 2) + pow(b, 2));
+  double d = std::fabs(a * point.x + b * point.y + c) / std::sqrt(std::pow(a, 2) + std::pow(b, 2));
 
   return d;
 }

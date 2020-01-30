@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef LIBWAYPOINT_FOLLOWER_TEST_LIBWAYPOINT_FOLLOWER_H
+#define LIBWAYPOINT_FOLLOWER_TEST_LIBWAYPOINT_FOLLOWER_H
+
 #include <gtest/gtest.h>
 #include "libwaypoint_follower/libwaypoint_follower.h"
 
@@ -28,9 +31,10 @@ struct DirectionCheckDataSet
 {
   int idx;
   double vel;
-  DirectionCheckDataSet(int i, double v) : idx(i), vel(v) {}
+  DirectionCheckDataSet(int i, double v) :
+    idx(i), vel(v)
+  {}
   DirectionCheckDataSet() {}
-  ~DirectionCheckDataSet() {}
 };
 
 struct ClosestCheckDataSet
@@ -43,7 +47,6 @@ struct ClosestCheckDataSet
   ClosestCheckDataSet(int d, double v, double o, int n, const geometry_msgs::PoseStamped& p)
     : dir(d), vel(v), offset(o), num(n), pose(p) {}
   ClosestCheckDataSet() {}
-  ~ClosestCheckDataSet() {}
 };
 
 class LibWaypointFollowerTestClass
@@ -76,6 +79,7 @@ public:
     }
     return std::move(lane);
   }
+
   geometry_msgs::PoseStamped generateCurrentPose(double x, double y, double yaw)
   {
     geometry_msgs::PoseStamped pose;
@@ -86,3 +90,5 @@ public:
     return std::move(pose);
   }
 };
+
+#endif  // LIBWAYPOINT_FOLLOWER_TEST_LIBWAYPOINT_FOLLOWER_H
