@@ -17,6 +17,10 @@
 #include <tf/transform_datatypes.h>
 #include <vector_map/vector_map.h>
 
+#include <map>
+#include <string>
+#include <vector>
+
 namespace vector_map
 {
 namespace
@@ -372,7 +376,7 @@ void updateRailCrossing(std::map<Key<RailCrossing>, RailCrossing>& map, const Ra
     map.insert(std::make_pair(Key<RailCrossing>(item.id), item));
   }
 }
-} // namespace
+}  // namespace
 
 bool VectorMap::hasSubscribed(category_t category) const
 {
@@ -1302,7 +1306,7 @@ std_msgs::ColorRGBA createColorRGBA(Color color)
     color_rgba.b = COLOR_VALUE_MAX;
     break;
   default:
-    color_rgba.a = COLOR_VALUE_MIN; // hide color from view
+    color_rgba.a = COLOR_VALUE_MIN;  // hide color from view
     break;
   }
 
@@ -1427,7 +1431,7 @@ visualization_msgs::Marker createAreaMarker(const std::string& ns, int id, Color
   Line line = vmap.findByKey(Key<Line>(area.slid));
   if (line.lid == 0)
     return marker;
-  if (line.blid != 0) // must set beginning line
+  if (line.blid != 0)  // must set beginning line
     return marker;
 
   while (line.flid != 0)
@@ -1611,8 +1615,8 @@ Point convertGeomPointToPoint(const geometry_msgs::Point& geom_point)
 
 geometry_msgs::Quaternion convertVectorToGeomQuaternion(const Vector& vector)
 {
-  double pitch = convertDegreeToRadian(vector.vang - 90); // convert vertical angle to pitch
-  double yaw = convertDegreeToRadian(-vector.hang + 90); // convert horizontal angle to yaw
+  double pitch = convertDegreeToRadian(vector.vang - 90);  // convert vertical angle to pitch
+  double yaw = convertDegreeToRadian(-vector.hang + 90);   // convert horizontal angle to yaw
   return tf::createQuaternionMsgFromRollPitchYaw(0, pitch, yaw);
 }
 
@@ -1626,7 +1630,7 @@ Vector convertGeomQuaternionToVector(const geometry_msgs::Quaternion& geom_quate
   vector.hang = -convertRadianToDegree(yaw) + 90;
   return vector;
 }
-} // namespace vector_map
+}  // namespace vector_map
 
 std::ostream& operator<<(std::ostream& os, const vector_map::Point& obj)
 {

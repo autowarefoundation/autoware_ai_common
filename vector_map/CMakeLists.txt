@@ -6,6 +6,7 @@ find_package(autoware_build_flags REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   tf
   geometry_msgs
+  roslint
   vector_map_msgs
   visualization_msgs
 )
@@ -34,6 +35,9 @@ target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
 
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14,-runtime/references")
+roslint_cpp()
+
 ## Install project namespaced headers
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
@@ -45,3 +49,7 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()
