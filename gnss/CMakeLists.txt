@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gnss)
 
-find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(catkin REQUIRED
+  COMPONENTS
+    roscpp
+    roslint
+)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -21,6 +25,18 @@ target_link_libraries(gnss
   ${catkin_LIBRARIES}
 )
 
+file(GLOB_RECURSE ROSLINT_FILES
+  LIST_DIRECTORIES false
+  *.cpp *.h *.hpp
+)
+
+list(APPEND ROSLINT_CPP_OPTS
+  "--extensions=cc,h,hpp,cpp,cu,cuh"
+  "--filter=-build/c++14"
+)
+
+roslint_cpp(${ROSLINT_FILES})
+
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.hpp"
@@ -33,6 +49,8 @@ install(TARGETS gnss
 )
 
 if(CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+
   find_package(rostest REQUIRED)
   find_package(rosunit REQUIRED)
 
