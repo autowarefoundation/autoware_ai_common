@@ -5,6 +5,7 @@ project(libvectormap)
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
+  roslint
   vector_map
   vector_map_msgs
 )
@@ -65,3 +66,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
+
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14,-runtime/references")
+roslint_cpp()
+
+if(CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()
