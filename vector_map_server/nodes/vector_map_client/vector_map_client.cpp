@@ -15,9 +15,9 @@
  */
 
 #include <geometry_msgs/PoseStamped.h>
-#include "autoware_msgs/Lane.h"
+#include <autoware_msgs/Lane.h>
 #include <visualization_msgs/MarkerArray.h>
-#include "vector_map/vector_map.h"
+#include <vector_map/vector_map.h>
 
 #include "vector_map_server/GetWhiteLine.h"
 #include "vector_map_server/GetStopLine.h"
@@ -74,7 +74,7 @@ public:
     waypoints_ = waypoints;
   }
 };
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv)
 {
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   vmap.subscribe(nh,
                  Category::POINT | Category::VECTOR | Category::LINE | Category::AREA | Category::POLE |
                  Category::WHITE_LINE | Category::STOP_LINE | Category::CROSS_WALK | Category::SIGNAL,
-                 ros::Duration(0)); // non-blocking
+                 ros::Duration(0));  // non-blocking
 
   ros::Subscriber pose_sub = nh.subscribe("current_pose", 1, &VectorMapClient::setPose, &vmc);
   ros::Subscriber waypoints_sub = nh.subscribe("final_waypoints", 1, &VectorMapClient::setWaypoints, &vmc);
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
     {
       for (auto& marker : marker_array.markers)
         marker.action = visualization_msgs::Marker::DELETE;
-      marker_array_pub.publish(marker_array); // clear previous marker
+      marker_array_pub.publish(marker_array);  // clear previous marker
     }
     marker_array = marker_array_buffer;
     marker_array_pub.publish(marker_array);

@@ -4,13 +4,14 @@ project(vector_map_server)
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  geometry_msgs
-  visualization_msgs
-  message_generation
-  vector_map
   autoware_msgs
+  geometry_msgs
+  message_generation
+  roscpp
+  roslint
+  vector_map
   vector_map_msgs
+  visualization_msgs
 )
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall ${CMAKE_CXX_FLAGS}")
@@ -93,8 +94,15 @@ add_dependencies(vector_map_client
   ${catkin_EXPORTED_TARGETS}
 )
 
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14,-runtime/references,-whitespace/braces")
+roslint_cpp()
+
 install(TARGETS ${PROJECT_NAME} vector_map_client
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()

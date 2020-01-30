@@ -15,9 +15,9 @@
  */
 
 #include <geometry_msgs/PoseStamped.h>
-#include "autoware_msgs/Lane.h"
+#include <autoware_msgs/Lane.h>
 #include <visualization_msgs/MarkerArray.h>
-#include "vector_map/vector_map.h"
+#include <vector_map/vector_map.h>
 
 #include "vector_map_server/GetDTLane.h"
 #include "vector_map_server/GetNode.h"
@@ -46,6 +46,8 @@
 #include "vector_map_server/GetFence.h"
 #include "vector_map_server/GetRailCrossing.h"
 #include "vector_map_server/PositionState.h"
+
+#include <vector>
 
 using vector_map::VectorMap;
 using vector_map::Category;
@@ -106,12 +108,12 @@ bool isMergingLane(const Lane& lane)
 
 double computeDistance(const Point& p1, const Point& p2)
 {
-  return std::hypot(p2.bx - p1.bx, p2.ly - p1.ly); // XXX: don't consider z axis
+  return std::hypot(p2.bx - p1.bx, p2.ly - p1.ly);  // XXX: don't consider z axis
 }
 
 double computeAngle(const Point& p1, const Point& p2)
 {
-  return std::atan2(p2.ly - p1.ly, p2.bx - p1.bx); // XXX: don't consider z axis
+  return std::atan2(p2.ly - p1.ly, p2.bx - p1.bx);  // XXX: don't consider z axis
 }
 
 double computeScore(const Point& bp1, const Point& bp2, const Point& p1, const Point& p2, double radius)
@@ -362,7 +364,7 @@ std::vector<Lane> createFineLanes(const VectorMap& vmap, const autoware_msgs::La
       if (fine_p1.pid == 0)
         return null_lanes;
 
-      Point coarse_p1 = findNearestPoint(coarse_points, fine_p1); // certainly succeed
+      Point coarse_p1 = findNearestPoint(coarse_points, fine_p1);  // certainly succeed
 
       if (computeDistance(fine_p1, coarse_p1) > radius)
         return null_lanes;
@@ -373,7 +375,7 @@ std::vector<Lane> createFineLanes(const VectorMap& vmap, const autoware_msgs::La
       {
         if (distance == -DBL_MAX)
         {
-          if (coarse_point.bx == coarse_p1.bx && coarse_point.ly == coarse_p1.ly) // XXX: don't consider z axis
+          if (coarse_point.bx == coarse_p1.bx && coarse_point.ly == coarse_p1.ly)  // XXX: don't consider z axis
             distance = 0;
           continue;
         }
@@ -574,7 +576,7 @@ private:
       {
         for (auto& marker : marker_array_.markers)
           marker.action = visualization_msgs::Marker::DELETE;
-        marker_array_pub_.publish(marker_array_); // clear previous marker
+        marker_array_pub_.publish(marker_array_);  // clear previous marker
       }
       marker_array_ = marker_array_buffer;
       marker_array_pub_.publish(marker_array_);
@@ -1033,7 +1035,7 @@ public:
     return true;
   }
 };
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv)
 {
