@@ -11,6 +11,7 @@
 
   <depend>cmake_modules</depend>
   <depend>eigen</depend>
+  <depend>roslint</depend>
   <depend>vector_map</depend>
   <depend>vector_map_msgs</depend>
 </package>

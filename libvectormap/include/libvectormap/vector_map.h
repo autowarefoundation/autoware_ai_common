@@ -1,20 +1,35 @@
-#ifndef __VECTOR_MAP__
-#define __VECTOR_MAP__
+/*
+ * Copyright 2018-2019 Autoware Foundation. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-//#include "ros/ros.h"
-//#include "std_msgs/String.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#ifndef LIBVECTORMAP_VECTOR_MAP_H
+#define LIBVECTORMAP_VECTOR_MAP_H
+
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 #include <vector>
 #include <map>
 #include <string>
+
 #include "Math.h"
 
 #include <vector_map/vector_map.h>
 
-
-typedef struct{
+typedef struct
+{
   int pid;
   double bx;
   double ly;
@@ -25,46 +40,57 @@ typedef struct{
   int mcode1;
   int mcode2;
   int mcode3;
-}Point;
+}
+Point;
 
-typedef struct{
+typedef struct
+{
   int lid;
   int bpid;
   int fpid;
   int blid;
   int flid;
-}Line;
+}
+Line;
 
-typedef struct{
+typedef struct
+{
   int vid;
   int pid;
   double hang;
   double vang;
-}Vector;
-  
+}
+Vector;
 
-typedef struct{
+typedef struct
+{
   int id;
   int vid;
   int plid;
   int type;
   int linkid;
-}Signal;
+}
+Signal;
 
-typedef struct{
+typedef struct
+{
   int id;
   int lid;
   double width;
   char color;
   int type;
   int linkid;
-}WhiteLine;
+}
+WhiteLine;
 
-typedef struct{
+typedef struct
+{
   int lid;
-}Mark;
+}
+Mark;
 
-typedef struct{
+typedef struct
+{
   int did;
   double dist;
   int pid;
@@ -75,9 +101,11 @@ typedef struct{
   double cant;
   double lw;
   double rw;
-}DTLane;
+}
+DTLane;
 
-typedef struct{
+typedef struct
+{
   int lnid;
   int did;
   int blid;
@@ -95,20 +123,20 @@ typedef struct{
   double span;
   int lcnt;
   int lno;
-}Lane;
-
+}
+Lane;
 
 class VectorMap
 {
- public:
+public:
   bool loaded;
-  std::map<int, Point > points;
-  std::map<int, Line > lines;
-  std::map<int, WhiteLine > whitelines;
-  std::map<int, Lane > lanes;
-  std::map<int, DTLane > dtlanes;
-  std::map<int, Vector > vectors;
-  std::map<int, Signal > signals;
+  std::map<int, Point> points;
+  std::map<int, Line> lines;
+  std::map<int, WhiteLine> whitelines;
+  std::map<int, Lane> lanes;
+  std::map<int, DTLane> dtlanes;
+  std::map<int, Vector> vectors;
+  std::map<int, Signal> signals;
 
   void load_points(const vector_map::PointArray& msg);
   void load_lines(const vector_map::LineArray& msg);
@@ -118,18 +146,18 @@ class VectorMap
   void load_whitelines(const vector_map::WhiteLineArray& msg);
   void load_dtlanes(const vector_map::DTLaneArray& msg);
 
-
-  VectorMap () :
+  VectorMap() :
     loaded(false) {}
 
-  inline Point3 getPoint (const int idx)
+  inline Point3 getPoint(const int idx)
   {
     Point3 p;
     Point psrc = points[idx];
-    p.x() = psrc.bx; p.y() = psrc.ly, p.z() = psrc.h;
+    p.x() = psrc.bx;
+    p.y() = psrc.ly;
+    p.z() = psrc.h;
     return p;
   }
-
 };
 
-#endif
+#endif  // LIBVECTORMAP_VECTOR_MAP_H
