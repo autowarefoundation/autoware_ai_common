@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include "test_libwaypoint_follower.hpp"
-
-#include <utility>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
-class LibWaypointFollowerTestSuite : public ::testing::Test
+#include "libwaypoint_follower/test_libwaypoint_follower.h"
+
+class LibWaypointFollowerTestSuite :
+  public ::testing::Test
 {
 public:
   LibWaypointFollowerTestSuite() {}
-  ~LibWaypointFollowerTestSuite() {}
   LibWaypointFollowerTestClass test_obj_;
 
 protected:
