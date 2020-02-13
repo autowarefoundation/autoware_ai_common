@@ -36,6 +36,14 @@ namespace lanelet
 namespace visualization
 {
 /**
+ * [polygon2Triangle converts polygon into vector of triangles. Used for
+ * triangulation]
+ * @param polygon        [input polygon]
+ * @param triangles [array of polygon message, each containing 3 vertices]
+ */
+void polygon2Triangle(const geometry_msgs::Polygon& polygon,
+                                     std::vector<geometry_msgs::Polygon>* triangles);
+/**
  * [lanelet2Triangle converts lanelet into vector of triangles. Used for
  * triangulation]
  * @param ll        [input lanelet]

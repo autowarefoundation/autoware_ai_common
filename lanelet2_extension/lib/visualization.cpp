@@ -222,6 +222,24 @@ void laneletDirectionAsMarker(const lanelet::ConstLanelet ll, visualization_msgs
     ci = ci + 1;
   }
 }
+
+bool isReflexAngle(const geometry_msgs::Point32& a, const geometry_msgs::Point32& o, const geometry_msgs::Point32& b)
+{
+  // angle aob is reflex in counterclock wise direction if point b is on the right side of vector oa
+  // which can be found out by calculating cross product of oa and ob
+  return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x) < 0;
+}
+
+bool isWithinTriangle(const geometry_msgs::Point32& a, const geometry_msgs::Point32& b, const geometry_msgs::Point32& c,
+                      const geometry_msgs::Point32& p)
+{
+  // point p in within triangle if p is on the same side
+  const double side1 = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);  // a to b
+  const double side2 = (c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x);  // b to c
+  const double side3 = (a.x - c.x) * (p.y - c.y) - (a.y - c.y) * (p.x - c.x);  // c to a
+  return (side1 > 0.0 && side2 > 0.0 && side3 > 0.0) || (side1 < 0.0 && side2 < 0.0 && side3 < 0.0);
+}
+
 }  // anonymous namespace
 
 namespace lanelet
@@ -237,59 +255,96 @@ void visualization::lanelet2Triangle(const lanelet::ConstLanelet& ll, std::vecto
   triangles->clear();
   geometry_msgs::Polygon ll_poly;
   lanelet2Polygon(ll, &ll_poly);
+  polygon2Triangle(ll_poly, triangles);
+}
 
+void visualization::polygon2Triangle(const geometry_msgs::Polygon& polygon,
+                                     std::vector<geometry_msgs::Polygon>* triangles)
+{
+  geometry_msgs::Polygon poly = polygon;
   // ear clipping: find smallest internal angle in polygon
-  int N = ll_poly.points.size();
+  int N = poly.points.size();
 
+  // array of angles for each vertex
+  std::vector<bool> is_reflex_angle;
+  is_reflex_angle.assign(N, false);
+  for (int i = 0; i < N; i++)
+  {
+    geometry_msgs::Point32 p0, p1, p2;
+
+    adjacentPoints(i, N, poly, &p0, &p1, &p2);
+    is_reflex_angle.at(i) = isReflexAngle(p0, p1, p2);
+  }
+
+  // start ear clipping
   while (N >= 3)
   {
-    double min_angle = 2 * M_PI;
-    int min_i = -1;
+    int clipped_vertex = -1;
 
     for (int i = 0; i < N; i++)
     {
-      geometry_msgs::Point32 p0, p1, p2;
-
-      adjacentPoints(i, N, ll_poly, &p0, &p1, &p2);
-
-      // angle at vertex i formed by p0, p1, p2
-      double a = hypot(p0, p1);
-      double b = hypot(p1, p2);
-      double c = hypot(p0, p2);
-      double theta = acos((a * a + b * b - c * c) / (2.0 * a * b));
-
-      // get explementary angle for superior angles
-      geometry_msgs::Point p64_0, p64_1, p64_2;
-      utils::conversion::toGeomMsgPt(p0, &p64_0);
-      utils::conversion::toGeomMsgPt(p1, &p64_1);
-      utils::conversion::toGeomMsgPt(p2, &p64_2);
-      if (amathutils::isPointLeftFromLine(p64_2, p64_0, p64_1) > 0)
+      bool is_reflex = is_reflex_angle.at(i);
+      if (!is_reflex)
       {
-        theta = 2 * M_PI - theta;
-      }
+        geometry_msgs::Point32 p0, p1, p2;
+        adjacentPoints(i, N, poly, &p0, &p1, &p2);
 
-      if (theta < min_angle)
-      {
-        min_angle = theta;
-        min_i = i;
+        int j_begin = (i + 2) % N;
+        int j_end = (i - 1 + N) % N;
+        bool is_ear = true;
+        for (int j = j_begin; j != j_end; j = (j + 1) % N)
+        {
+          if (isWithinTriangle(p0, p1, p2, poly.points.at(j)))
+          {
+            is_ear = false;
+            break;
+          }
+        }
+
+        if (is_ear)
+        {
+          clipped_vertex = i;
+          break;
+        }
       }
     }
-    if (min_i >= 0 && min_i < N)
+    if (clipped_vertex < 0 || clipped_vertex >= N)
     {
-      geometry_msgs::Point32 p0, p1, p2;
-      adjacentPoints(min_i, N, ll_poly, &p0, &p1, &p2);
-      geometry_msgs::Polygon triangle;
-      triangle.points.push_back(p0);
-      triangle.points.push_back(p1);
-      triangle.points.push_back(p2);
-      triangles->push_back(triangle);
-
-      // remove vertex of center of angle
-      auto it = ll_poly.points.begin();
-      std::advance(it, min_i);
-      ll_poly.points.erase(it);
+      ROS_ERROR("Could not find valid vertex for ear clipping triangulation. Triangulation result might be invalid");
+      clipped_vertex = 0;
     }
-    N = ll_poly.points.size();
+
+    // create triangle
+    geometry_msgs::Point32 p0, p1, p2;
+    adjacentPoints(clipped_vertex, N, poly, &p0, &p1, &p2);
+    geometry_msgs::Polygon triangle;
+    triangle.points.push_back(p0);
+    triangle.points.push_back(p1);
+    triangle.points.push_back(p2);
+    triangles->push_back(triangle);
+
+    // remove vertex of center of angle
+    auto it = poly.points.begin();
+    std::advance(it, clipped_vertex);
+    poly.points.erase(it);
+
+    // remove from angle list
+    auto it_angle = is_reflex_angle.begin();
+    std::advance(it_angle, clipped_vertex);
+    is_reflex_angle.erase(it_angle);
+
+    // update angle list
+    N = poly.points.size();
+    if (clipped_vertex == N)
+    {
+      clipped_vertex = 0;
+    }
+    adjacentPoints(clipped_vertex, N, poly, &p0, &p1, &p2);
+    is_reflex_angle.at(clipped_vertex) = isReflexAngle(p0, p1, p2);
+
+    int i_prev = (clipped_vertex == 0) ? N - 1 : clipped_vertex - 1;
+    adjacentPoints(i_prev, N, poly, &p0, &p1, &p2);
+    is_reflex_angle.at(i_prev) = isReflexAngle(p0, p1, p2);
   }
 }
 
