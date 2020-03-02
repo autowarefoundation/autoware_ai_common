@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(PCL REQUIRED COMPONENTS io)
+find_package(Boost REQUIRED COMPONENTS filesystem)
+
 # See: https://github.com/ros-perception/perception_pcl/blob/lunar-devel/pcl_ros/CMakeLists.txt#L10-L22
 if(NOT "${PCL_LIBRARIES}" STREQUAL "")
   # FIXME: this causes duplicates and not found error in ubuntu:zesty
@@ -48,6 +50,7 @@ catkin_package(
     std_msgs
     tf2_geometry_msgs
     visualization_msgs
+  DEPENDS Boost
 )
 
 include_directories(
@@ -55,6 +58,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PCL_IO_INCLUDE_DIRS}
   ${CURL_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
 )
 
 add_library(get_file
@@ -73,7 +77,7 @@ target_link_libraries(vector_map_loader ${catkin_LIBRARIES} ${vector_map_LIBRARI
 add_dependencies(vector_map_loader ${catkin_EXPORTED_TARGETS})
 
 add_executable(lanelet2_map_loader nodes/lanelet2_map_loader/lanelet2_map_loader.cpp)
-target_link_libraries(lanelet2_map_loader ${catkin_LIBRARIES})
+target_link_libraries(lanelet2_map_loader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(lanelet2_map_loader ${catkin_EXPORTED_TARGETS})
 
 add_executable(lanelet2_map_visualization nodes/lanelet2_map_loader/lanelet2_map_visualization.cpp)
