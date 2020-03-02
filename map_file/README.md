@@ -11,8 +11,25 @@ points_map_filter_node subscribe pointcloud maps and current pose, the node extr
 /points_map/filtered (sensor_msgs/PointCloud2) : Filtered pointcloud submap.  
 
 #### parameters
-load_grid_size (double) : grid size of submap.  
-load_trigger_distance (double) : if the car moves load_trigger_distance(m), the map filter publish filtered submap. 
+
+For points_map_filter
+
+| Param | Type | Default value | Options |
+|-------|------|---------------|-----------|
+| load_grid_size | double | 100.0 | grid size of submap. |
+| load_trigger_distance | double | 20.0 | if the car moves load_trigger_distance(m), the map filter publish filtered submap. |
+
+For points_map_loader
+
+| Param | Type | Default value | Options |
+|-------|------|---------------|-----------|
+| points_map_loader/area | String | "noupdate" | "noupdate", "1x1", "3x3", "5x5", "7x7", "9x9" |
+| points_map_loader/mode | String | "" | "", "download" |
+| points_map_loader/pcd_paths | String array | [] | - |
+| points_map_loader/arealist_path | String array | [] | - |
+
+.pcd file search function is also implemented. Now you can specify multiple files or directories for pcd_paths.
+If directories are specified, it automatically search files in it.
 
 ### how it works
 map_filter_node relay /points_map topic until it recieves /current_pose topic.  

@@ -31,44 +31,70 @@
 #include <autoware_lanelet2_msgs/MapBin.h>
 
 #include <string>
-
-void printUsage()
-{
-  ROS_ERROR_STREAM("Usage:");
-  ROS_ERROR_STREAM("rosrun map_file lanelet2_map_loader [.OSM]");
-  ROS_ERROR_STREAM("rosrun map_file lanelet2_map_loader download [X] [Y]: WARNING not implemented");
-}
+#include <boost/filesystem.hpp>
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "lanelet_map_loader");
-  ros::NodeHandle rosnode;
+  ros::NodeHandle nh;
+  ros::NodeHandle pnh("~");
 
-  if (argc < 2)
+  std::string lanelet2_path;
+  pnh.param<std::string>("lanelet2_path", lanelet2_path, "");
+
+  std::string lanelet2_file_path;
+  boost::filesystem::path path(lanelet2_path);
+  if (boost::filesystem::is_regular_file(path))
   {
-    printUsage();
+    // If file
+    lanelet2_file_path = path.generic_string();
+  }
+  else if (boost::filesystem::is_directory(path))
+  {
+    // If directory
+    std::vector<boost::filesystem::path> file_path_list;
+    for (const boost::filesystem::path& entry :
+         boost::make_iterator_range(boost::filesystem::directory_iterator(path), {}))
+    {
+      if (boost::filesystem::is_regular_file(entry))
+      {
+        file_path_list.push_back(entry);
+      }
+    }
+
+    if (file_path_list.size() > 0)
+    {
+      // Find first path
+      auto min_it = std::min_element(file_path_list.begin(), file_path_list.end(),
+                                     [](const boost::filesystem::path& a, const boost::filesystem::path& b) {
+                                       return a.filename().generic_string() < b.filename().generic_string();
+                                     });
+      lanelet2_file_path = (*min_it).generic_string();
+    }
+    else
+    {
+      lanelet2_file_path = "";
+    }
+  }
+
+  if (lanelet2_file_path == "")
+  {
+    ROS_ERROR("[lanelet2_map_loader] File name is not specified or wrong. [%s]", lanelet2_file_path.c_str());
     return EXIT_FAILURE;
   }
 
-  std::string mode(argv[1]);
-  if (mode == "download" && argc < 4)
-  {
-    printUsage();
-    return EXIT_FAILURE;
-  }
-
-  std::string lanelet2_filename(argv[1]);
+  ROS_INFO("[lanelet2_map_loader] Will load %s", lanelet2_file_path.c_str());
 
   lanelet::ErrorMessages errors;
 
   lanelet::projection::MGRSProjector projector;
-  lanelet::LaneletMapPtr map = lanelet::load(lanelet2_filename, projector, &errors);
+  lanelet::LaneletMapPtr map = lanelet::load(lanelet2_file_path, projector, &errors);
 
-  for(const auto &error: errors)
+  for (const auto& error : errors)
   {
     ROS_ERROR_STREAM(error);
   }
-  if(!errors.empty())
+  if (!errors.empty())
   {
     return EXIT_FAILURE;
   }
@@ -76,9 +102,9 @@ int main(int argc, char** argv)
   lanelet::utils::overwriteLaneletsCenterline(map, false);
 
   std::string format_version, map_version;
-  lanelet::io_handlers::AutowareOsmParser::parseVersions(lanelet2_filename, &format_version, &map_version);
+  lanelet::io_handlers::AutowareOsmParser::parseVersions(lanelet2_file_path, &format_version, &map_version);
 
-  ros::Publisher map_bin_pub = rosnode.advertise<autoware_lanelet2_msgs::MapBin>("/lanelet_map_bin", 1, true);
+  ros::Publisher map_bin_pub = nh.advertise<autoware_lanelet2_msgs::MapBin>("/lanelet_map_bin", 1, true);
   autoware_lanelet2_msgs::MapBin map_bin_msg;
   map_bin_msg.header.stamp = ros::Time::now();
   map_bin_msg.header.frame_id = "map";
