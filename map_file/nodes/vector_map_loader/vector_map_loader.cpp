@@ -99,6 +99,13 @@ using vector_map::createPoleMarker;
 
 namespace
 {
+
+enum class LoadMode {
+  FILE,
+  DIRECTORY,
+  DOWNLOAD
+};
+
 void printUsage()
 {
   ROS_ERROR_STREAM("Usage:");
@@ -113,15 +120,24 @@ bool isDownloaded(const std::string& local_path)
 }
 
 template <class T, class U>
-U createObjectArray(const std::string& file_path)
+vector_map::category_t registerVectormapPortion(
+  const std::string& file_path, ros::Publisher *publisher,
+  const std::string topic_name, const vector_map::category_t category,
+  ros::NodeHandle *nh)
 {
   U obj_array;
-  // NOTE: Autoware want to use map messages with or without /use_sim_time.
-  // Therefore we don't set obj_array.header.stamp.
-  // obj_array.header.stamp = ros::Time::now();
   obj_array.header.frame_id = "map";
   obj_array.data = vector_map::parse<T>(file_path);
-  return obj_array;
+  if (!obj_array.data.empty())
+  {
+    *publisher = nh->advertise<U>(topic_name, 1, true);
+    publisher->publish(obj_array);
+    return category;
+  }
+  else
+  {
+    return Category::NONE;
+  }
 }
 
 visualization_msgs::Marker createLinkedLineMarker(const std::string& ns, int id, Color color, const VectorMap& vmap,
@@ -916,52 +932,88 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "vector_map_loader");
   ros::NodeHandle nh;
+  ros::NodeHandle pnh("~");
 
-  if (argc < 2)
+  LoadMode load_mode = LoadMode::FILE;
+  if (pnh.hasParam("load_mode"))
   {
-    printUsage();
-    return EXIT_FAILURE;
+    // Set mode based on rosparam
+    std::string load_mode_param;
+    pnh.getParam("load_mode", load_mode_param);
+    if (load_mode_param == "file")
+    {
+      load_mode = LoadMode::FILE;
+    }
+    else if (load_mode_param == "directory")
+    {
+      load_mode = LoadMode::DIRECTORY;
+    }
+    else if (load_mode_param == "download")
+    {
+      load_mode = LoadMode::DOWNLOAD;
+    }
+    else
+    {
+      printUsage();
+    }
+  }
+  else
+  {
+    // Set mode based on args
+    if (argc < 2)
+    {
+      printUsage();
+      ros::shutdown();
+    }
+
+    if (strcmp(argv[1], "download") == 0)
+    {
+      load_mode = LoadMode::DOWNLOAD;
+      if (argc < 4)
+      {
+        printUsage();
+        ros::shutdown();
+      }
+    }
   }
 
-  std::string mode(argv[1]);
-  if (mode == "download" && argc < 4)
-  {
-    printUsage();
-    return EXIT_FAILURE;
-  }
+  // Directory containing vector map csvs
+  std::string map_dir;
+  pnh.param<std::string>("map_dir", map_dir, "");
 
-  ros::Publisher point_pub = nh.advertise<PointArray>("vector_map_info/point", 1, true);
-  ros::Publisher vector_pub = nh.advertise<VectorArray>("vector_map_info/vector", 1, true);
-  ros::Publisher line_pub = nh.advertise<LineArray>("vector_map_info/line", 1, true);
-  ros::Publisher area_pub = nh.advertise<AreaArray>("vector_map_info/area", 1, true);
-  ros::Publisher pole_pub = nh.advertise<PoleArray>("vector_map_info/pole", 1, true);
-  ros::Publisher box_pub = nh.advertise<BoxArray>("vector_map_info/box", 1, true);
-  ros::Publisher dtlane_pub = nh.advertise<DTLaneArray>("vector_map_info/dtlane", 1, true);
-  ros::Publisher node_pub = nh.advertise<NodeArray>("vector_map_info/node", 1, true);
-  ros::Publisher lane_pub = nh.advertise<LaneArray>("vector_map_info/lane", 1, true);
-  ros::Publisher way_area_pub = nh.advertise<WayAreaArray>("vector_map_info/way_area", 1, true);
-  ros::Publisher road_edge_pub = nh.advertise<RoadEdgeArray>("vector_map_info/road_edge", 1, true);
-  ros::Publisher gutter_pub = nh.advertise<GutterArray>("vector_map_info/gutter", 1, true);
-  ros::Publisher curb_pub = nh.advertise<CurbArray>("vector_map_info/curb", 1, true);
-  ros::Publisher white_line_pub = nh.advertise<WhiteLineArray>("vector_map_info/white_line", 1, true);
-  ros::Publisher stop_line_pub = nh.advertise<StopLineArray>("vector_map_info/stop_line", 1, true);
-  ros::Publisher zebra_zone_pub = nh.advertise<ZebraZoneArray>("vector_map_info/zebra_zone", 1, true);
-  ros::Publisher cross_walk_pub = nh.advertise<CrossWalkArray>("vector_map_info/cross_walk", 1, true);
-  ros::Publisher road_mark_pub = nh.advertise<RoadMarkArray>("vector_map_info/road_mark", 1, true);
-  ros::Publisher road_pole_pub = nh.advertise<RoadPoleArray>("vector_map_info/road_pole", 1, true);
-  ros::Publisher road_sign_pub = nh.advertise<RoadSignArray>("vector_map_info/road_sign", 1, true);
-  ros::Publisher signal_pub = nh.advertise<SignalArray>("vector_map_info/signal", 1, true);
-  ros::Publisher street_light_pub = nh.advertise<StreetLightArray>("vector_map_info/street_light", 1, true);
-  ros::Publisher utility_pole_pub = nh.advertise<UtilityPoleArray>("vector_map_info/utility_pole", 1, true);
-  ros::Publisher guard_rail_pub = nh.advertise<GuardRailArray>("vector_map_info/guard_rail", 1, true);
-  ros::Publisher side_walk_pub = nh.advertise<SideWalkArray>("vector_map_info/side_walk", 1, true);
-  ros::Publisher drive_on_portion_pub = nh.advertise<DriveOnPortionArray>("vector_map_info/drive_on_portion", 1, true);
-  ros::Publisher cross_road_pub = nh.advertise<CrossRoadArray>("vector_map_info/cross_road", 1, true);
-  ros::Publisher side_strip_pub = nh.advertise<SideStripArray>("vector_map_info/side_strip", 1, true);
-  ros::Publisher curve_mirror_pub = nh.advertise<CurveMirrorArray>("vector_map_info/curve_mirror", 1, true);
-  ros::Publisher wall_pub = nh.advertise<WallArray>("vector_map_info/wall", 1, true);
-  ros::Publisher fence_pub = nh.advertise<FenceArray>("vector_map_info/fence", 1, true);
-  ros::Publisher rail_crossing_pub = nh.advertise<RailCrossingArray>("vector_map_info/rail_crossing", 1, true);
+  // Vector map publishers will be initialized later as data is loaded.
+  ros::Publisher area_pub;
+  ros::Publisher box_pub;
+  ros::Publisher cross_road_pub;
+  ros::Publisher cross_walk_pub;
+  ros::Publisher curb_pub;
+  ros::Publisher curve_mirror_pub;
+  ros::Publisher drive_on_portion_pub;
+  ros::Publisher dtlane_pub;
+  ros::Publisher fence_pub;
+  ros::Publisher guard_rail_pub;
+  ros::Publisher gutter_pub;
+  ros::Publisher lane_pub;
+  ros::Publisher line_pub;
+  ros::Publisher node_pub;
+  ros::Publisher point_pub;
+  ros::Publisher pole_pub;
+  ros::Publisher rail_crossing_pub;
+  ros::Publisher road_edge_pub;
+  ros::Publisher road_mark_pub;
+  ros::Publisher road_pole_pub;
+  ros::Publisher road_sign_pub;
+  ros::Publisher side_strip_pub;
+  ros::Publisher side_walk_pub;
+  ros::Publisher signal_pub;
+  ros::Publisher stop_line_pub;
+  ros::Publisher street_light_pub;
+  ros::Publisher utility_pole_pub;
+  ros::Publisher vector_pub;
+  ros::Publisher wall_pub;
+  ros::Publisher way_area_pub;
+  ros::Publisher white_line_pub;
+  ros::Publisher zebra_zone_pub;
 
   ros::Publisher marker_array_pub = nh.advertise<visualization_msgs::MarkerArray>("vector_map", 1, true);
   ros::Publisher stat_pub = nh.advertise<std_msgs::Bool>("vmap_stat", 1, true);
@@ -971,16 +1023,54 @@ int main(int argc, char **argv)
   stat_pub.publish(stat);
 
   std::vector<std::string> file_paths;
-  if (mode == "download")
+  std::vector<std::string> file_names
   {
+    "area.csv",
+    "box.csv",
+    "crosswalk.csv",
+    "curb.csv",
+    "curvemirror.csv",
+    "driveon_portion.csv",
+    "dtlane.csv",
+    "fence.csv",
+    "guardrail.csv",
+    "gutter.csv",
+    "idx.csv",
+    "intersection.csv",
+    "lane.csv",
+    "line.csv",
+    "node.csv",
+    "point.csv",
+    "pole.csv",
+    "poledata.csv",
+    "railroad_crossing.csv",
+    "road_surface_mark.csv",
+    "roadedge.csv",
+    "roadsign.csv",
+    "sidestrip.csv",
+    "sidewalk.csv",
+    "signaldata.csv",
+    "stopline.csv",
+    "streetlight.csv",
+    "utilitypole.csv",
+    "vector.csv",
+    "wall.csv",
+    "wayarea.csv",
+    "whiteline.csv",
+    "zebrazone.csv"
+  };
+
+  if (load_mode == LoadMode::DOWNLOAD)
+  {
+    ROS_INFO("Load Mode: Download");
     std::string host_name;
-    nh.param<std::string>("vector_map_loader/host_name", host_name, HTTP_HOSTNAME);
+    pnh.param<std::string>("host_name", host_name, HTTP_HOSTNAME);
     int port;
-    nh.param<int>("vector_map_loader/port", port, HTTP_PORT);
+    pnh.param<int>("port", port, HTTP_PORT);
     std::string user;
-    nh.param<std::string>("vector_map_loader/user", user, HTTP_USER);
+    pnh.param<std::string>("user", user, HTTP_USER);
     std::string password;
-    nh.param<std::string>("vector_map_loader/password", password, HTTP_PASSWORD);
+    pnh.param<std::string>("password", password, HTTP_PASSWORD);
     GetFile gf = GetFile(host_name, port, user, password);
 
     std::string remote_path = "/data/map";
@@ -1004,42 +1094,6 @@ int main(int argc, char **argv)
       }
     }
 
-    std::vector<std::string> file_names
-    {
-      "idx.csv",
-      "point.csv",
-      "vector.csv",
-      "line.csv",
-      "area.csv",
-      "pole.csv",
-      "box.csv",
-      "dtlane.csv",
-      "node.csv",
-      "lane.csv",
-      "wayarea.csv",
-      "roadedge.csv",
-      "gutter.csv",
-      "curb.csv",
-      "whiteline.csv",
-      "stopline.csv",
-      "zebrazone.csv",
-      "crosswalk.csv",
-      "road_surface_mark.csv",
-      "poledata.csv",
-      "roadsign.csv",
-      "signaldata.csv",
-      "streetlight.csv",
-      "utilitypole.csv",
-      "guardrail.csv",
-      "sidewalk.csv",
-      "driveon_portion.csv",
-      "intersection.csv",
-      "sidestrip.csv",
-      "curvemirror.csv",
-      "wall.csv",
-      "fence.csv",
-      "railroad_crossing.csv"
-    };
     for (const auto& file_name : file_names)
     {
       if (gf.GetHTTPFile(remote_path + "/" + file_name) == 0)
@@ -1048,8 +1102,26 @@ int main(int argc, char **argv)
         ROS_ERROR_STREAM("download failure: " << remote_path + "/" + file_name);
     }
   }
-  else
+  else if (load_mode == LoadMode::DIRECTORY)
   {
+    ROS_INFO("Load Mode: Directory");
+    // add slash if it doesn't exist
+    if (map_dir.back() != '/')
+    {
+      map_dir.append("/");
+    }
+
+    // Add all possible file paths for csv files.
+    for (auto file_name : file_names)
+    {
+      std::string file_path = map_dir;
+      file_path.append(file_name);
+      file_paths.push_back(file_path);
+    }
+  }
+  else if (load_mode == LoadMode::FILE)
+  {
+    ROS_INFO("Load Mode: File");
     for (int i = 1; i < argc; ++i)
     {
       std::string file_path(argv[i]);
@@ -1067,167 +1139,139 @@ int main(int argc, char **argv)
     }
     else if (file_name == "point.csv")
     {
-      point_pub.publish(createObjectArray<Point, PointArray>(file_path));
-      category |= Category::POINT;
+      category |= registerVectormapPortion<Point, PointArray>(file_path, &point_pub, "vector_map_info/point", Category::POINT, &nh);
     }
     else if (file_name == "vector.csv")
     {
-      vector_pub.publish(createObjectArray<Vector, VectorArray>(file_path));
-      category |= Category::VECTOR;
+      category |= registerVectormapPortion<Vector, VectorArray>(file_path, &vector_pub, "vector_map_info/vector", Category::VECTOR, &nh);
     }
     else if (file_name == "line.csv")
     {
-      line_pub.publish(createObjectArray<Line, LineArray>(file_path));
-      category |= Category::LINE;
+      category |= registerVectormapPortion<Line, LineArray>(file_path, &line_pub, "vector_map_info/line", Category::LINE, &nh);
     }
     else if (file_name == "area.csv")
     {
-      area_pub.publish(createObjectArray<Area, AreaArray>(file_path));
-      category |= Category::AREA;
+      category |= registerVectormapPortion<Area, AreaArray>(file_path, &area_pub, "vector_map_info/area", Category::AREA, &nh);
     }
     else if (file_name == "pole.csv")
     {
-      pole_pub.publish(createObjectArray<Pole, PoleArray>(file_path));
-      category |= Category::POLE;
+      category |= registerVectormapPortion<Pole, PoleArray>(file_path, &pole_pub, "vector_map_info/pole", Category::POLE, &nh);
     }
     else if (file_name == "box.csv")
     {
-      box_pub.publish(createObjectArray<Box, BoxArray>(file_path));
-      category |= Category::BOX;
+      category |= registerVectormapPortion<Box, BoxArray>(file_path, &box_pub, "vector_map_info/box", Category::BOX, &nh);
     }
     else if (file_name == "dtlane.csv")
     {
-      dtlane_pub.publish(createObjectArray<DTLane, DTLaneArray>(file_path));
-      category |= Category::DTLANE;
+      category |= registerVectormapPortion<DTLane, DTLaneArray>(file_path, &dtlane_pub, "vector_map_info/dtlane", Category::DTLANE, &nh);
     }
     else if (file_name == "node.csv")
     {
-      node_pub.publish(createObjectArray<Node, NodeArray>(file_path));
-      category |= Category::NODE;
+      category |= registerVectormapPortion<Node, NodeArray>(file_path, &node_pub, "vector_map_info/node", Category::NODE, &nh);
     }
     else if (file_name == "lane.csv")
     {
-      lane_pub.publish(createObjectArray<Lane, LaneArray>(file_path));
-      category |= Category::LANE;
+      category |= registerVectormapPortion<Lane, LaneArray>(file_path, &lane_pub, "vector_map_info/lane", Category::LANE, &nh);
     }
     else if (file_name == "wayarea.csv")
     {
-      way_area_pub.publish(createObjectArray<WayArea, WayAreaArray>(file_path));
-      category |= Category::WAY_AREA;
+      category |= registerVectormapPortion<WayArea, WayAreaArray>(file_path, &way_area_pub, "vector_map_info/way_area", Category::WAY_AREA, &nh);
     }
     else if (file_name == "roadedge.csv")
     {
-      road_edge_pub.publish(createObjectArray<RoadEdge, RoadEdgeArray>(file_path));
-      category |= Category::ROAD_EDGE;
+      category |= registerVectormapPortion<RoadEdge, RoadEdgeArray>(file_path, &road_edge_pub, "vector_map_info/road_edge", Category::ROAD_EDGE, &nh);
     }
     else if (file_name == "gutter.csv")
     {
-      gutter_pub.publish(createObjectArray<Gutter, GutterArray>(file_path));
-      category |= Category::GUTTER;
+      category |= registerVectormapPortion<Gutter, GutterArray>(file_path, &gutter_pub, "vector_map_info/gutter", Category::GUTTER, &nh);
     }
     else if (file_name == "curb.csv")
     {
-      curb_pub.publish(createObjectArray<Curb, CurbArray>(file_path));
-      category |= Category::CURB;
+      category |= registerVectormapPortion<Curb, CurbArray>(file_path, &curb_pub, "vector_map_info/curb", Category::CURB, &nh);
     }
     else if (file_name == "whiteline.csv")
     {
-      white_line_pub.publish(createObjectArray<WhiteLine, WhiteLineArray>(file_path));
-      category |= Category::WHITE_LINE;
+      category |= registerVectormapPortion<WhiteLine, WhiteLineArray>(file_path, &white_line_pub, "vector_map_info/white_line", Category::WHITE_LINE, &nh);
     }
     else if (file_name == "stopline.csv")
     {
-      stop_line_pub.publish(createObjectArray<StopLine, StopLineArray>(file_path));
-      category |= Category::STOP_LINE;
+      category |= registerVectormapPortion<StopLine, StopLineArray>(file_path, &stop_line_pub, "vector_map_info/stop_line", Category::STOP_LINE, &nh);
     }
     else if (file_name == "zebrazone.csv")
     {
-      zebra_zone_pub.publish(createObjectArray<ZebraZone, ZebraZoneArray>(file_path));
-      category |= Category::ZEBRA_ZONE;
+      category |= registerVectormapPortion<ZebraZone, ZebraZoneArray>(file_path, &zebra_zone_pub, "vector_map_info/zebra_zone", Category::ZEBRA_ZONE, &nh);
     }
     else if (file_name == "crosswalk.csv")
     {
-      cross_walk_pub.publish(createObjectArray<CrossWalk, CrossWalkArray>(file_path));
-      category |= Category::CROSS_WALK;
+      category |= registerVectormapPortion<CrossWalk, CrossWalkArray>(file_path, &cross_walk_pub, "vector_map_info/cross_walk", Category::CROSS_WALK, &nh);
     }
     else if (file_name == "road_surface_mark.csv")
     {
-      road_mark_pub.publish(createObjectArray<RoadMark, RoadMarkArray>(file_path));
-      category |= Category::ROAD_MARK;
+      category |= registerVectormapPortion<RoadMark, RoadMarkArray>(file_path, &road_mark_pub, "vector_map_info/road_mark", Category::ROAD_MARK, &nh);
     }
     else if (file_name == "poledata.csv")
     {
-      road_pole_pub.publish(createObjectArray<RoadPole, RoadPoleArray>(file_path));
-      category |= Category::ROAD_POLE;
+      category |= registerVectormapPortion<RoadPole, RoadPoleArray>(file_path, &road_pole_pub, "vector_map_info/road_pole", Category::ROAD_POLE, &nh);
     }
     else if (file_name == "roadsign.csv")
     {
-      road_sign_pub.publish(createObjectArray<RoadSign, RoadSignArray>(file_path));
-      category |= Category::ROAD_SIGN;
+      category |= registerVectormapPortion<RoadSign, RoadSignArray>(file_path, &road_sign_pub, "vector_map_info/road_sign", Category::ROAD_SIGN, &nh);
     }
     else if (file_name == "signaldata.csv")
     {
-      signal_pub.publish(createObjectArray<Signal, SignalArray>(file_path));
-      category |= Category::SIGNAL;
+      category |= registerVectormapPortion<Signal, SignalArray>(file_path, &signal_pub, "vector_map_info/signal", Category::SIGNAL, &nh);
     }
     else if (file_name == "streetlight.csv")
     {
-      street_light_pub.publish(createObjectArray<StreetLight, StreetLightArray>(file_path));
-      category |= Category::STREET_LIGHT;
+      category |= registerVectormapPortion<StreetLight, StreetLightArray>(file_path, &street_light_pub, "vector_map_info/street_light", Category::STREET_LIGHT, &nh);
     }
     else if (file_name == "utilitypole.csv")
     {
-      utility_pole_pub.publish(createObjectArray<UtilityPole, UtilityPoleArray>(file_path));
-      category |= Category::UTILITY_POLE;
+      category |= registerVectormapPortion<UtilityPole, UtilityPoleArray>(file_path, &utility_pole_pub, "vector_map_info/utility_pole", Category::UTILITY_POLE, &nh);
     }
     else if (file_name == "guardrail.csv")
     {
-      guard_rail_pub.publish(createObjectArray<GuardRail, GuardRailArray>(file_path));
-      category |= Category::GUARD_RAIL;
+      category |= registerVectormapPortion<GuardRail, GuardRailArray>(file_path, &guard_rail_pub, "vector_map_info/guard_rail", Category::GUARD_RAIL, &nh);
     }
     else if (file_name == "sidewalk.csv")
     {
-      side_walk_pub.publish(createObjectArray<SideWalk, SideWalkArray>(file_path));
-      category |= Category::SIDE_WALK;
+      category |= registerVectormapPortion<SideWalk, SideWalkArray>(file_path, &side_walk_pub, "vector_map_info/side_walk", Category::SIDE_WALK, &nh);
     }
     else if (file_name == "driveon_portion.csv")
     {
-      drive_on_portion_pub.publish(createObjectArray<DriveOnPortion, DriveOnPortionArray>(file_path));
-      category |= Category::DRIVE_ON_PORTION;
+      category |= registerVectormapPortion<DriveOnPortion, DriveOnPortionArray>(file_path, &drive_on_portion_pub, "vector_map_info/drive_on_portion", Category::DRIVE_ON_PORTION, &nh);
     }
     else if (file_name == "intersection.csv")
     {
-      cross_road_pub.publish(createObjectArray<CrossRoad, CrossRoadArray>(file_path));
-      category |= Category::CROSS_ROAD;
+      category |= registerVectormapPortion<CrossRoad, CrossRoadArray>(file_path, &cross_road_pub, "vector_map_info/cross_road", Category::CROSS_ROAD, &nh);
     }
     else if (file_name == "sidestrip.csv")
     {
-      side_strip_pub.publish(createObjectArray<SideStrip, SideStripArray>(file_path));
-      category |= Category::SIDE_STRIP;
+      category |= registerVectormapPortion<SideStrip, SideStripArray>(file_path, &side_strip_pub, "vector_map_info/side_strip", Category::SIDE_STRIP, &nh);
     }
     else if (file_name == "curvemirror.csv")
     {
-      curve_mirror_pub.publish(createObjectArray<CurveMirror, CurveMirrorArray>(file_path));
-      category |= Category::CURVE_MIRROR;
+      category |= registerVectormapPortion<CurveMirror, CurveMirrorArray>(file_path, &curve_mirror_pub, "vector_map_info/curve_mirror", Category::CURVE_MIRROR, &nh);
     }
     else if (file_name == "wall.csv")
     {
-      wall_pub.publish(createObjectArray<Wall, WallArray>(file_path));
-      category |= Category::WALL;
+      category |= registerVectormapPortion<Wall, WallArray>(file_path, &wall_pub, "vector_map_info/wall", Category::WALL, &nh);
     }
     else if (file_name == "fence.csv")
     {
-      fence_pub.publish(createObjectArray<Fence, FenceArray>(file_path));
-      category |= Category::FENCE;
+      category |= registerVectormapPortion<Fence, FenceArray>(file_path, &fence_pub, "vector_map_info/fence", Category::FENCE, &nh);
     }
     else if (file_name == "railroad_crossing.csv")
     {
-      rail_crossing_pub.publish(createObjectArray<RailCrossing, RailCrossingArray>(file_path));
-      category |= Category::RAIL_CROSSING;
+      category |= registerVectormapPortion<RailCrossing, RailCrossingArray>(file_path, &rail_crossing_pub, "vector_map_info/rail_crossing", Category::RAIL_CROSSING, &nh);
     }
     else
+    {
       ROS_ERROR_STREAM("unknown csv file: " << file_path);
+    }
   }
+
+  ROS_INFO("Published vector_map_info topics");
 
   VectorMap vmap;
   vmap.subscribe(nh, category);
@@ -1257,6 +1301,7 @@ int main(int argc, char **argv)
   insertMarkerArray(marker_array, createFenceMarkerArray(vmap, Color::LIGHT_RED));
   insertMarkerArray(marker_array, createRailCrossingMarkerArray(vmap, Color::LIGHT_MAGENTA));
   marker_array_pub.publish(marker_array);
+  ROS_INFO("Published vector_map visualization");
 
   stat.data = true;
   stat_pub.publish(stat);
