@@ -117,10 +117,10 @@ TEST_F(TestSuite, QueryStopLine)
   lanelet::ConstLanelets all_lanelets = lanelet::utils::query::laneletLayer(sample_map_ptr);
   lanelet::ConstLanelets road_lanelets = lanelet::utils::query::roadLanelets(all_lanelets);
 
-  auto stop_lines = lanelet::utils::query::stopLinesLanelets(all_lanelets);
+  auto stop_lines = lanelet::utils::query::getTrafficLightStopLines(all_lanelets);
   ASSERT_EQ(1, stop_lines.size()) << "failed to retrieve stop lines from all lanelets";
 
-  auto stop_lines2 = lanelet::utils::query::stopLinesLanelet(road_lanelets.front());
+  auto stop_lines2 = lanelet::utils::query::getTrafficLightStopLines(road_lanelets.front());
   ASSERT_EQ(1, stop_lines2.size()) << "failed to retrieve stop lines from a lanelet";
 }
 
