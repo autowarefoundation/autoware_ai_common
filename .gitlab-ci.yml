@@ -114,7 +114,7 @@ build_melodic_arm64:
   image: autoware/arm64v8:bleedingedge-melodic-base
   <<: *build_common
   only:
-    - master
+    - branches@autowarefoundation/autoware.ai/common
 
 build_melodic_cross:
   stage: build
