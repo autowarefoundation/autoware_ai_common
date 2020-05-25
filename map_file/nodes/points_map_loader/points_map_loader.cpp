@@ -490,7 +490,7 @@ int main(int argc, char** argv)
   pnh.getParam("pcd_paths", pcd_paths);
 
   std::string arealist_path;
-  pnh.param<std::string>("arealist_path", "");
+  pnh.param<std::string>("arealist_path", arealist_path, "");
 
   // Search all files in pcd_paths
   std::vector<std::string> pcd_file_paths;
