@@ -21,7 +21,7 @@ jobs:
       env:
         VCS_FILE: build_depends.repos
         ROS_DISTRO: melodic
-      options: --user 1001
+      options: --user root
 
     steps:
 
