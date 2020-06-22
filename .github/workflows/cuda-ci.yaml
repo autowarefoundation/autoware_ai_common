@@ -47,7 +47,7 @@ jobs:
       run: |
         bash -c 'source /opt/ros/$ROS_DISTRO/setup.bash; \
         source depends_ws/install/local_setup.bash; \
-        colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug; \
-        colcon build --cmake-target tests --cmake-args -DCMAKE_BUILD_TYPE=Debug; \
+        colcon build; \
+        colcon build --cmake-target tests; \
         colcon test; \
         colcon test-result --verbose'
