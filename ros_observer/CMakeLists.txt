@@ -34,6 +34,7 @@ add_executable(
 target_link_libraries(
   ros_observer
   rt ${Boost_LIBRARIES}
+  pthread
 )
 
 add_dependencies(
