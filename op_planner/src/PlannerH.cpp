@@ -137,7 +137,9 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
     const bool bEnableLaneChange,
     const std::vector<int>& globalPath,
     RoadNetwork& map,
-    std::vector<std::vector<WayPoint> >& paths, vector<WayPoint*>* all_cell_to_delete)
+    std::vector<std::vector<WayPoint> >& paths,
+    vector<WayPoint*>* all_cell_to_delete,
+    double fallback_min_goal_distance_th)
 {
   PlannerHNS::WayPoint* pStart = PlannerHNS::MappingHelpers::GetClosestWaypointFromMap(start, map);
   PlannerHNS::WayPoint* pGoal = PlannerHNS::MappingHelpers::GetClosestWaypointFromMap(goalPos, map);
@@ -197,9 +199,15 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
   char bPlan = 'A';
 
   if(all_cell_to_delete)
-    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart, *pGoal, globalPath, maxPlanningDistance,bEnableLaneChange, *all_cell_to_delete);
+    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart,
+                                      *pGoal, globalPath, maxPlanningDistance,
+                                      bEnableLaneChange, *all_cell_to_delete,
+                                      fallback_min_goal_distance_th);
   else
-    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart, *pGoal, globalPath, maxPlanningDistance,bEnableLaneChange, local_cell_to_delete);
+    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart,
+                                      *pGoal, globalPath, maxPlanningDistance,
+                                      bEnableLaneChange, local_cell_to_delete,
+                                      fallback_min_goal_distance_th);
 
   if(!pLaneCell)
   {
