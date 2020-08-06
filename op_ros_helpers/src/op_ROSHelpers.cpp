@@ -318,7 +318,7 @@ void ROSHelpers::InitCurbsMarkers(const int& nMarkers, visualization_msgs::Marke
   }
 }
 
-void ROSHelpers::ConvertPredictedTrqajectoryMarkers(std::vector<std::vector<PlannerHNS::WayPoint> >& paths,visualization_msgs::MarkerArray& path_markers, visualization_msgs::MarkerArray& path_markers_d)
+void ROSHelpers::ConvertPredictedTrajectoriesMarkers(std::vector<std::vector<PlannerHNS::WayPoint> >& paths,visualization_msgs::MarkerArray& path_markers, visualization_msgs::MarkerArray& path_markers_d)
 {
 
   path_markers = path_markers_d;
