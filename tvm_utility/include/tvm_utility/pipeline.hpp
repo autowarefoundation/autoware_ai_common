@@ -17,6 +17,10 @@
 #include <dlpack/dlpack.h>
 #include <string>
 #include <tvm/runtime/c_runtime_api.h>
+#include <tvm/runtime/module.h>
+#include <tvm/runtime/packed_func.h>
+#include <tvm/runtime/registry.h>
+#include <fstream>
 #include <vector>
 
 #pragma once
@@ -31,12 +35,13 @@ public:
   TVMArrayContainer(std::vector<int64_t> shape, DLDataTypeCode dtype_code,
                     uint32_t dtype_bits, uint32_t dtype_lanes,
                     DLDeviceType device_type, uint32_t device_id) {
-
     TVMArray *x{};
     TVMArrayAlloc(&shape[0], shape.size(), dtype_code, dtype_bits, dtype_lanes,
                   device_type, device_id, &x);
     handle_ = std::make_shared<TVMArray *>(x);
   }
+
+  TVMArray *getArray() const { return *handle_.get(); }
 
 private:
   std::shared_ptr<TVMArray *> handle_{nullptr, [](TVMArray *ptr) {
@@ -47,15 +52,14 @@ private:
 
 using TVMArrayContainerVector = std::vector<TVMArrayContainer>;
 
-    /**
-     * @class PipelineStage
-     * @brief Base class for all types of pipeline stages.
-     *
-     * @tparam InputType The datatype of the input of the pipeline stage.
-     * @tparam OutputType The datatype of the output from the pipeline stage.
-     */
-    template <class InputType, class OutputType>
-    class PipelineStage {
+/**
+ * @class PipelineStage
+ * @brief Base class for all types of pipeline stages.
+ *
+ * @tparam InputType The datatype of the input of the pipeline stage.
+ * @tparam OutputType The datatype of the output from the pipeline stage.
+ */
+template <class InputType, class OutputType> class PipelineStage {
 public:
   /**
    * @brief Execute the pipeline stage
@@ -80,7 +84,8 @@ public:
  * stage. Usually a ROS message type.
  */
 template <class InputType>
-class PreProcessor : public PipelineStage<InputType, TVMArrayContainerVector> {};
+class PreProcessor : public PipelineStage<InputType, TVMArrayContainerVector> {
+};
 
 /**
  * @class InferenceEngine
@@ -101,8 +106,8 @@ class InferenceEngine
  * Usually a ROS message type.
  */
 template <class OutputType>
-class PostProcessor : public PipelineStage<TVMArrayContainerVector, OutputType> {
-};
+class PostProcessor
+    : public PipelineStage<TVMArrayContainerVector, OutputType> {};
 
 /**
  * @class Pipeline
@@ -174,20 +179,103 @@ typedef struct {
 
 class InferenceEngineTVM : public InferenceEngine {
 public:
-  InferenceEngineTVM(InferenceEngineTVMConfig config) : config_(config){};
+  InferenceEngineTVM(InferenceEngineTVMConfig config) : config_(config) {
+    // load compiled functions
+    std::ifstream module(config.network_module_path);
+    if (not module.good()) {
+      throw std::runtime_error(
+          "File " + config.network_module_path +
+          " specified in inference_engine_tvm_config.h not "
+          "found");
+    }
+    module.close();
+    tvm::runtime::Module mod =
+        tvm::runtime::Module::LoadFromFile(config.network_module_path);
+
+    // load json graph
+    std::ifstream json_in(config.network_graph_path, std::ios::in);
+    if (not json_in.good()) {
+      throw std::runtime_error(
+          "File " + config.network_graph_path +
+          " specified in inference_engine_tvm_config.h not "
+          "found");
+    }
+    std::string json_data((std::istreambuf_iterator<char>(json_in)),
+                          std::istreambuf_iterator<char>());
+    json_in.close();
+
+    // load parameters from binary file
+    std::ifstream params_in(config.network_params_path, std::ios::binary);
+    if (not params_in.good()) {
+      throw std::runtime_error(
+          "File " + config.network_params_path +
+          " specified in inference_engine_tvm_config.h not "
+          "found");
+    }
+    std::string params_data((std::istreambuf_iterator<char>(params_in)),
+                            std::istreambuf_iterator<char>());
+    params_in.close();
+
+    // parameters need to be in TVMByteArray format
+    TVMByteArray params_arr;
+    params_arr.data = params_data.c_str();
+    params_arr.size = params_data.length();
+
+    // create tvm runtime module
+    tvm::runtime::Module runtime_mod =
+        (*tvm::runtime::Registry::Get("tvm.graph_runtime.create"))(
+            json_data, mod, (int)config.tvm_device_type, config.tvm_device_id);
+
+    // load parameters
+    auto load_params = runtime_mod.GetFunction("load_params");
+    load_params(params_arr);
+
+    // get set_input function
+    set_input = runtime_mod.GetFunction("set_input");
+
+    // get the function which executes the network
+    execute = runtime_mod.GetFunction("run");
+
+    // get the function to get output data
+    get_output = runtime_mod.GetFunction("get_output");
+
+    for (auto &output_config : config.network_outputs) {
+      output_.push_back(
+          TVMArrayContainer(output_config.second, config.tvm_dtype_code,
+                            config.tvm_dtype_bits, config.tvm_dtype_lanes,
+                            config.tvm_device_type, config.tvm_device_id));
+    }
+  }
+
   TVMArrayContainerVector schedule(const TVMArrayContainerVector &input) {
-    // call tvm inference engine with the given input
-    // tvm_inf_func(input);
+    // set input(s)
+    for (int index = 0; index < input.size(); ++index) {
+      if (input[index].getArray() == nullptr) {
+        throw std::runtime_error("input variable is null");
+      }
+      set_input(config_.network_inputs[index].first.c_str(),
+                input[index].getArray());
+    }
 
-    // get output
-    TVMArrayContainer output;
-    // tvm_output_func(output);
+    // execute the inference
+    execute();
 
-    return {output};
-  };
+    // get output(s)
+    for (int index = 0; index < output_.size(); ++index) {
+      if (output_[index].getArray() == nullptr) {
+        throw std::runtime_error("output variable is null");
+      }
+      get_output(index, output_[index].getArray());
+    }
+    return output_;
+  }
 
 private:
   InferenceEngineTVMConfig config_;
+  TVMArrayContainerVector output_;
+  tvm::runtime::PackedFunc set_input;
+  tvm::runtime::PackedFunc execute;
+  tvm::runtime::PackedFunc get_output;
 };
 
 } // namespace pipeline
