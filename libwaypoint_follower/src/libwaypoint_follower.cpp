@@ -162,7 +162,6 @@ double getRelativeAngle(geometry_msgs::Pose waypoint_pose, geometry_msgs::Pose v
   relative_waypoint_v.normalize();
   tf::Vector3 relative_pose_v(1, 0, 0);
   double angle = relative_pose_v.angle(relative_waypoint_v) * 180 / M_PI;
-  // ROS_INFO("angle : %lf",angle);
 
   return angle;
 }
@@ -243,7 +242,9 @@ public:
 int getClosestWaypoint(const autoware_msgs::Lane &current_path, geometry_msgs::Pose current_pose)
 {
   if (current_path.waypoints.size() < 2 || getLaneDirection(current_path) == LaneDirection::Error)
+  {
     return -1;
+  }
 
   WayPoints wp;
   wp.setPath(current_path);
@@ -252,7 +253,7 @@ int getClosestWaypoint(const autoware_msgs::Lane &current_path, geometry_msgs::P
   double search_distance = 5.0;
   double angle_threshold = 90;
   MinIDSearch cand_idx, not_cand_idx;
-  for (int i = 1; i < wp.getSize(); i++)
+  for (int i = 0; i < wp.getSize(); i++)
   {
     if (!wp.inDrivingDirection(i, current_pose))
       continue;
@@ -263,10 +264,6 @@ int getClosestWaypoint(const autoware_msgs::Lane &current_path, geometry_msgs::P
     if (getRelativeAngle(wp.getWaypointPose(i), current_pose) > angle_threshold)
       continue;
     cand_idx.update(i, distance);
-  }
-  if (!cand_idx.isOK())
-  {
-    ROS_INFO("no candidate. search closest waypoint from all waypoints...");
   }
   return (!cand_idx.isOK()) ? not_cand_idx.result() : cand_idx.result();
 }
@@ -282,7 +279,6 @@ bool getLinearEquation(geometry_msgs::Point start, geometry_msgs::Point end, dou
 
   if (sub_x < error && sub_y < error)
   {
-    ROS_INFO("two points are the same point!!");
     return false;
   }
 
@@ -519,4 +515,3 @@ geometry_msgs::Point transformToRelativeCoordinate3D(const geometry_msgs::Point 
   geometry_msgs::Point transformed_p = tf2::toMsg(transformed_v);
   return transformed_p;
 }
-
