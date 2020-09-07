@@ -83,7 +83,11 @@ double PlannerH::PlanUsingDPRandom(const WayPoint& start,
   }
 
   RelativeInfo start_info;
-  PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info);
+  if(!PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info))
+  {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for start failed";
+    return 0;
+  }
 
   if(start_info.perp_distance > START_POINT_MAX_DISTANCE)
   {
@@ -160,8 +164,15 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
   }
 
   RelativeInfo start_info, goal_info;
-  PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info);
-  PlanningHelpers::GetRelativeInfo(pGoal->pLane->points, goalPos, goal_info);
+  if(!PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info))
+  {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for start failed";
+    return 0;
+  }
+  if(!PlanningHelpers::GetRelativeInfo(pGoal->pLane->points, goalPos, goal_info)) {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for goal failed";
+    return 0;
+  }
 
   vector<WayPoint> start_path, goal_path;
 
