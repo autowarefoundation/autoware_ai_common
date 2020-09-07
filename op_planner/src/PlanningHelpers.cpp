@@ -1954,7 +1954,7 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
     vector<WayPoint*>& all_cells_to_delete,
     double fallback_min_goal_distance_th)
 {
-  if(!pStart) return NULL;
+  if(!pStart) return nullptr;
 
   vector<pair<WayPoint*, WayPoint*> >nextLeafToTrace;
 
@@ -2136,7 +2136,7 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeStraight(WayPoint* pStart,
     const double& DistanceLimit,
     vector<WayPoint*>& all_cells_to_delete)
 {
-  if(!pStart) return NULL;
+  if(!pStart) return nullptr;
 
   vector<pair<WayPoint*, WayPoint*> >nextLeafToTrace;
 
@@ -2476,7 +2476,7 @@ WayPoint* PlanningHelpers::CreateLaneHeadCell(Lane* pLane, WayPoint* pLeft, WayP
 double PlanningHelpers::GetLanePoints(Lane* l, const WayPoint& prevWayPointIndex,
     const double& minDistance , const double& prevCost, vector<WayPoint>& points)
 {
-  if(l == NULL || minDistance<=0) return 0;
+  if(l == nullptr || minDistance<=0) return 0;
 
   int index = 0;
   WayPoint  p1, p2;
@@ -2604,7 +2604,7 @@ void PlanningHelpers::ExtractPlanAlernatives(const std::vector<WayPoint>& single
 void PlanningHelpers::TraversePathTreeBackwards(WayPoint* pHead, WayPoint* pStartWP,const vector<int>& globalPathIds,
     vector<WayPoint>& localPath, std::vector<std::vector<WayPoint> >& localPaths)
 {
-  if(pHead != NULL && pHead->id != pStartWP->id)
+  if(pHead != nullptr && pHead->id != pStartWP->id)
   {
     if(pHead->pBacks.size()>0)
     {
