@@ -1951,9 +1951,10 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
     const vector<int>& globalPath,
     const double& DistanceLimit,
     const bool& bEnableLaneChange,
-    vector<WayPoint*>& all_cells_to_delete)
+    vector<WayPoint*>& all_cells_to_delete,
+    double fallback_min_goal_distance_th)
 {
-  if(!pStart) return NULL;
+  if(!pStart) return nullptr;
 
   vector<pair<WayPoint*, WayPoint*> >nextLeafToTrace;
 
@@ -1967,7 +1968,9 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
   double     before_change_distance  = 0;
   WayPoint*   pGoalCell     = 0;
   double     nCounter     = 0;
-
+  WayPoint* pH = nullptr;
+  WayPoint* pMinGoalDistanceNode = nullptr;
+  double min_goal_distance_to_waypoint = std::numeric_limits<double>::max();
 
   while(nextLeafToTrace.size()>0)
   {
@@ -1985,7 +1988,7 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
       }
     }
 
-    WayPoint* pH   = nextLeafToTrace.at(min_cost_index).second;
+    pH = nextLeafToTrace.at(min_cost_index).second;
 
     assert(pH != 0);
 
@@ -2001,6 +2004,12 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
     }
     else
     {
+      // Keep track of minimum distance for any waypoint to the target
+      // destination and the corresponding pH (waypoint pointer)
+      if(distance_to_goal < min_goal_distance_to_waypoint) {
+        min_goal_distance_to_waypoint = distance_to_goal;
+        pMinGoalDistanceNode = pH;
+      }
 
       if(pH->pLeft && !CheckLaneExits(all_cells_to_delete, pH->pLeft->pLane) && !CheckNodeExits(all_cells_to_delete, pH->pLeft) && bEnableLaneChange && before_change_distance > LANE_CHANGE_MIN_DISTANCE)
       {
@@ -2086,6 +2095,40 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeV2(WayPoint* pStart,
     nextLeafToTrace.pop_back();
   //closed_nodes.clear();
 
+  if(pGoalCell) {
+    cout << endl << "PlanningHelpers::BuildPlanningSearchTreeV2 pGoalCell=("
+        <<  pGoalCell->pos.x << "," << pGoalCell->pos.y << ")" << endl;
+  } else {
+    // If we reach this point, it means that we couldn't find a waypoint to
+    // reach the destination. But let's try to find a waypoint close enough
+    // and use that as the nearest destination.
+    if(min_goal_distance_to_waypoint < fallback_min_goal_distance_th) {
+      // If we found a node close enough, lets find the index of that in
+      // all_cells_to_delete and then we would remove any nodes added in the
+      // list afterwards as that would be the final/destination waypoint
+      int min_node_index = FindNodeIndex(all_cells_to_delete,
+                                        pMinGoalDistanceNode);
+      cout << endl
+           << "PlanningHelpers::BuildPlanningSearchTreeV2 min_node_index:"
+           << min_node_index << " min_goal_distance_to_waypoint:"
+           << min_goal_distance_to_waypoint << endl;
+      if(min_node_index >= 0) {
+        pGoalCell = pMinGoalDistanceNode;
+        cout << endl
+        << "PlanningHelpers::BuildPlanningSearchTreeV2 pGoalCell is NULL, but "
+        << "pH=(" << pGoalCell->pos.x << "," << pGoalCell->pos.y << ")" << endl;
+        all_cells_to_delete.erase(
+          all_cells_to_delete.begin()+min_node_index,
+          all_cells_to_delete.end()
+        );
+      }
+    } else {
+      cout << endl << "PlanningHelpers::BuildPlanningSearchTreeV2 Unable to "
+           <<"find pGoalCell, minimum goal distance waypoint beyond threshold: "
+           << min_goal_distance_to_waypoint << endl;
+    }
+  }
+
   return pGoalCell;
 }
 
@@ -2093,7 +2136,7 @@ WayPoint* PlanningHelpers::BuildPlanningSearchTreeStraight(WayPoint* pStart,
     const double& DistanceLimit,
     vector<WayPoint*>& all_cells_to_delete)
 {
-  if(!pStart) return NULL;
+  if(!pStart) return nullptr;
 
   vector<pair<WayPoint*, WayPoint*> >nextLeafToTrace;
 
@@ -2382,6 +2425,20 @@ WayPoint* PlanningHelpers::CheckNodeExits(const vector<WayPoint*>& nodes, const 
   return nullptr;
 }
 
+//Given the vector nodes, returns the index of p in it
+int PlanningHelpers::FindNodeIndex(const vector<WayPoint*>& nodes, const WayPoint* p)
+{
+  if(nodes.size()==0) return -1;
+
+  for(unsigned int i=0; i< nodes.size(); i++)
+  {
+    if(nodes.at(i)->laneId == p->laneId && nodes.at(i)->id == p->id)
+      return i;
+  }
+
+  return -1;
+}
+
 WayPoint* PlanningHelpers::CreateLaneHeadCell(Lane* pLane, WayPoint* pLeft, WayPoint* pRight,
     WayPoint* pBack)
 {
@@ -2419,7 +2476,7 @@ WayPoint* PlanningHelpers::CreateLaneHeadCell(Lane* pLane, WayPoint* pLeft, WayP
 double PlanningHelpers::GetLanePoints(Lane* l, const WayPoint& prevWayPointIndex,
     const double& minDistance , const double& prevCost, vector<WayPoint>& points)
 {
-  if(l == NULL || minDistance<=0) return 0;
+  if(l == nullptr || minDistance<=0) return 0;
 
   int index = 0;
   WayPoint  p1, p2;
@@ -2547,7 +2604,7 @@ void PlanningHelpers::ExtractPlanAlernatives(const std::vector<WayPoint>& single
 void PlanningHelpers::TraversePathTreeBackwards(WayPoint* pHead, WayPoint* pStartWP,const vector<int>& globalPathIds,
     vector<WayPoint>& localPath, std::vector<std::vector<WayPoint> >& localPaths)
 {
-  if(pHead != NULL && pHead->id != pStartWP->id)
+  if(pHead != nullptr && pHead->id != pStartWP->id)
   {
     if(pHead->pBacks.size()>0)
     {

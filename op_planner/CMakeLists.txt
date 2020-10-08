@@ -74,3 +74,9 @@ install(TARGETS op_planner
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  catkin_add_gtest(test-op_planner test/src/test_BuildPlanningSearchTreeV2.cpp)
+  target_link_libraries(test-op_planner ${catkin_LIBRARIES} ${PROJECT_NAME})
+endif()

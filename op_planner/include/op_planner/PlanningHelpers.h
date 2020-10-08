@@ -125,7 +125,8 @@ public:
       const WayPoint& goalPos,
       const std::vector<int>& globalPath, const double& DistanceLimit,
       const bool& bEnableLaneChange,
-      std::vector<WayPoint*>& all_cells_to_delete );
+      std::vector<WayPoint*>& all_cells_to_delete,
+      double fallback_min_goal_distance_th = 0.0 );
 
   static WayPoint* BuildPlanningSearchTreeStraight(WayPoint* pStart,
       const double& DistanceLimit,
@@ -142,6 +143,8 @@ public:
   static WayPoint* CheckLaneExits(const std::vector<WayPoint*>& nodes, const Lane* pL);
 
   static WayPoint* CheckNodeExits(const std::vector<WayPoint*>& nodes, const WayPoint* pL);
+
+  static int FindNodeIndex(const std::vector<WayPoint*>& nodes, const WayPoint* p);
 
   static WayPoint* CreateLaneHeadCell(Lane* pLane, WayPoint* pLeft, WayPoint* pRight,
       WayPoint* pBack);

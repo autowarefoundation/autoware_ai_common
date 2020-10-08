@@ -83,7 +83,11 @@ double PlannerH::PlanUsingDPRandom(const WayPoint& start,
   }
 
   RelativeInfo start_info;
-  PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info);
+  if(!PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info))
+  {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for start failed";
+    return 0;
+  }
 
   if(start_info.perp_distance > START_POINT_MAX_DISTANCE)
   {
@@ -137,7 +141,9 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
     const bool bEnableLaneChange,
     const std::vector<int>& globalPath,
     RoadNetwork& map,
-    std::vector<std::vector<WayPoint> >& paths, vector<WayPoint*>* all_cell_to_delete)
+    std::vector<std::vector<WayPoint> >& paths,
+    vector<WayPoint*>* all_cell_to_delete,
+    double fallback_min_goal_distance_th)
 {
   PlannerHNS::WayPoint* pStart = PlannerHNS::MappingHelpers::GetClosestWaypointFromMap(start, map);
   PlannerHNS::WayPoint* pGoal = PlannerHNS::MappingHelpers::GetClosestWaypointFromMap(goalPos, map);
@@ -158,8 +164,15 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
   }
 
   RelativeInfo start_info, goal_info;
-  PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info);
-  PlanningHelpers::GetRelativeInfo(pGoal->pLane->points, goalPos, goal_info);
+  if(!PlanningHelpers::GetRelativeInfo(pStart->pLane->points, start, start_info))
+  {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for start failed";
+    return 0;
+  }
+  if(!PlanningHelpers::GetRelativeInfo(pGoal->pLane->points, goalPos, goal_info)) {
+    cout << endl << "Error: PlannerH -> GetRelativeInfo for goal failed";
+    return 0;
+  }
 
   vector<WayPoint> start_path, goal_path;
 
@@ -197,9 +210,15 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
   char bPlan = 'A';
 
   if(all_cell_to_delete)
-    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart, *pGoal, globalPath, maxPlanningDistance,bEnableLaneChange, *all_cell_to_delete);
+    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart,
+                                      *pGoal, globalPath, maxPlanningDistance,
+                                      bEnableLaneChange, *all_cell_to_delete,
+                                      fallback_min_goal_distance_th);
   else
-    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart, *pGoal, globalPath, maxPlanningDistance,bEnableLaneChange, local_cell_to_delete);
+    pLaneCell =  PlanningHelpers::BuildPlanningSearchTreeV2(pStart,
+                                      *pGoal, globalPath, maxPlanningDistance,
+                                      bEnableLaneChange, local_cell_to_delete,
+                                      fallback_min_goal_distance_th);
 
   if(!pLaneCell)
   {
