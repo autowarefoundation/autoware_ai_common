@@ -188,7 +188,7 @@ TEST_F(LibWaypointFollowerTestSuite, getClosestWaypoint)
   dataset["(no_point_path)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, 0.0, 0, valid_pose), -1);
   dataset["(valid_forward)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, -0.5, 100, valid_pose), 1);
   dataset["(valid_backward)"] = std::make_pair(ClosestCheckDataSet(-1, -5.0, -1.5, 100, valid_pose), 2);
-  dataset["(over_distance)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, 6.0, 100, valid_pose), 1);
+  dataset["(over_distance)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, 6.0, 100, valid_pose), 0);
   dataset["(opposite_lane)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, -0.5, 100, invalid_pose), 1);
   dataset["(pass_endpoint)"] = std::make_pair(ClosestCheckDataSet(1, 5.0, -100.0, 100, valid_pose), -1);
 
