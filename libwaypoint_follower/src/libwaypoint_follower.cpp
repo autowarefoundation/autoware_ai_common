@@ -229,7 +229,7 @@ public:
       val_min_ = v;
     }
   }
-  const double result() const
+  const int result() const
   {
     return idx_min_;
   }
