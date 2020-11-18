@@ -62,6 +62,8 @@ void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
 
   int prev_wp_gid;
   bool first_wp = true;
+
+  // Loop over each waypoint
   for (const auto& wp : waypoints)
   {
     if (first_wp)
@@ -71,39 +73,61 @@ void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
       continue;
     }
 
+    // Pointer to vector of candidate lanelet ids for the current waypoint
     auto candidate_ids_ptr = &wp_candidate_lanelets->at(wp.gid);
+
+    // Pointer to vector of candidate lanelet ids for the previous waypoint
     const auto prev_wp_candidate_ids_ptr = &wp_candidate_lanelets->at(prev_wp_gid);
 
-    // do not eliminate if previous waypoint do not have any candidate
+    // Do not remove candidates if previous waypoint does not have any candidates
     if (prev_wp_candidate_ids_ptr->empty())
+    {
+      prev_wp_gid = wp.gid;
       continue;
+    }
+
+    // Skip if there is only one candidate lanelet for this waypoint
+    if (candidate_ids_ptr->size() == 1)
+    {
+      prev_wp_gid = wp.gid;
+      continue;
+    }
 
     std::vector<int> removing_ids;
+
+    // Loop over each candidate lanelet id
     for (const auto candidate_id : *candidate_ids_ptr)
     {
-      // do not eliminate if the belonging lane exists in candidates of previous
-      // waypoint
+      // Do not remove candidate if the candidate lanelet id exists in the
+      // candidates of the previous waypoint
+      // This is to prevent removing a candidate that is the same lanelet as
+      // the previous waypoint's lanelet
       if (exists(*prev_wp_candidate_ids_ptr, candidate_id))
+      {
         continue;
+      }
 
-      auto lanelet = lanelet_map->laneletLayer.get(candidate_id);
-      // get available previous lanelet from routing graph
+      auto candidate_lanelet = lanelet_map->laneletLayer.get(candidate_id);
+
+      // Get previous connecting lanelets from routing graph
       lanelet::ConstLanelets previous_lanelets;
       if (reverse)
       {
-        previous_lanelets = routing_graph->following(lanelet);
+        previous_lanelets = routing_graph->following(candidate_lanelet);
       }
       else
       {
-        previous_lanelets = routing_graph->previous(lanelet);
+        previous_lanelets = routing_graph->previous(candidate_lanelet);
       }
 
-      // connection is impossible if none of predecessor lanelets match with
-      // lanelet candidates from previous waypoint
+      // Loop over all lanelets that connect (feed into) to the current lanelet
+      // candidate.
       bool connection_possible = false;
-      for (const auto& previous_lanelet : previous_lanelets)
+      for (const auto& connecting_lanelet : previous_lanelets)
       {
-        if (exists(*prev_wp_candidate_ids_ptr, previous_lanelet.id()))
+        // Remove candidate if previous waypoint's candidate lanelets don't
+        // connect to the current candidate lanelet.
+        if (exists(*prev_wp_candidate_ids_ptr, connecting_lanelet.id()))
         {
           connection_possible = true;
           break;
@@ -118,9 +142,10 @@ void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
     // declare function for remove_if separately, because roslint is not supporting lambda functions very well.
     auto remove_existing_func = [removing_ids](int id) { return exists(removing_ids, id); };
 
-    auto result = std::remove_if(candidate_ids_ptr->begin(), candidate_ids_ptr->end(), remove_existing_func);
+    // Remove candidate lanelet ids
+    auto shortened_end = std::remove_if(candidate_ids_ptr->begin(), candidate_ids_ptr->end(), remove_existing_func);
+    candidate_ids_ptr->erase(shortened_end, candidate_ids_ptr->end());
 
-    candidate_ids_ptr->erase(result, candidate_ids_ptr->end());
     prev_wp_gid = wp.gid;
   }
 }
