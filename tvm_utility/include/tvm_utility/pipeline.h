@@ -14,40 +14,51 @@
  * limitations under the License.
  */
 
-#include <dlpack/dlpack.h>
+#include <tvm_vendor/dlpack/dlpack.h>
 #include <string>
-#include <tvm/runtime/c_runtime_api.h>
-#include <tvm/runtime/module.h>
-#include <tvm/runtime/packed_func.h>
-#include <tvm/runtime/registry.h>
+#include <tvm_vendor/tvm/runtime/c_runtime_api.h>
+#include <tvm_vendor/tvm/runtime/module.h>
+#include <tvm_vendor/tvm/runtime/packed_func.h>
+#include <tvm_vendor/tvm/runtime/registry.h>
 #include <fstream>
+#include <utility>
 #include <vector>
 
-#pragma once
+#ifndef TVM_UTILITY_PIPELINE_H
+#define TVM_UTILITY_PIPELINE_H
 
-namespace tvm_utility {
-namespace pipeline {
+namespace tvm_utility
+{
+namespace pipeline
+{
 
-class TVMArrayContainer {
+class TVMArrayContainer
+{
 public:
   TVMArrayContainer() = default;
 
   TVMArrayContainer(std::vector<int64_t> shape, DLDataTypeCode dtype_code,
                     uint32_t dtype_bits, uint32_t dtype_lanes,
-                    DLDeviceType device_type, uint32_t device_id) {
-    TVMArray *x{};
+                    DLDeviceType device_type, uint32_t device_id)
+  {
+    TVMArrayHandle x{};
     TVMArrayAlloc(&shape[0], shape.size(), dtype_code, dtype_bits, dtype_lanes,
                   device_type, device_id, &x);
-    handle_ = std::make_shared<TVMArray *>(x);
+    handle_ = std::make_shared<TVMArrayHandle>(x);
   }
 
-  TVMArray *getArray() const { return *handle_.get(); }
+  TVMArrayHandle getArray() const { return *handle_.get(); }
 
 private:
-  std::shared_ptr<TVMArray *> handle_{nullptr, [](TVMArray *ptr) {
-                                        if (ptr)
-                                          TVMArrayFree(ptr);
-                                      }};
+  std::shared_ptr<TVMArrayHandle> handle_
+  {
+    nullptr,
+    [](TVMArrayHandle ptr)
+    {
+      if (ptr)
+        TVMArrayFree(ptr);
+    }
+  };
 };
 
 using TVMArrayContainerVector = std::vector<TVMArrayContainer>;
@@ -59,7 +70,8 @@ using TVMArrayContainerVector = std::vector<TVMArrayContainer>;
  * @tparam InputType The datatype of the input of the pipeline stage.
  * @tparam OutputType The datatype of the output from the pipeline stage.
  */
-template <class InputType, class OutputType> class PipelineStage {
+template <class InputType, class OutputType> class PipelineStage
+{
 public:
   /**
    * @brief Execute the pipeline stage
@@ -84,8 +96,7 @@ public:
  * stage. Usually a ROS message type.
  */
 template <class InputType>
-class PreProcessor : public PipelineStage<InputType, TVMArrayContainerVector> {
-};
+class PreProcessor : public PipelineStage<InputType, TVMArrayContainerVector> {};
 
 /**
  * @class InferenceEngine
@@ -116,7 +127,8 @@ class PostProcessor
  */
 template <class PreProcessorType, class InferenceEngineType,
           class PostProcessorType>
-class Pipeline {
+class Pipeline
+{
   using InputType =
       decltype(std::declval<PreProcessorType>().input_type_indicator_);
   using OutputType =
@@ -141,7 +153,8 @@ public:
    * @param input The data to push into the pipeline
    * @return The pipeline output
    */
-  OutputType schedule(const InputType &input) {
+  OutputType schedule(const InputType &input)
+  {
     auto input_tensor = pre_processor_.schedule(input);
     auto output_tensor = inference_engine_.schedule(input_tensor);
     return post_processor_.schedule(output_tensor);
@@ -155,7 +168,8 @@ private:
 
 // each node should be specificed with a string name and a shape
 using NetworkNode = std::pair<std::string, std::vector<int64_t>>;
-typedef struct {
+typedef struct
+{
   // network files
   std::string network_module_path;
   std::string network_graph_path;
@@ -175,14 +189,18 @@ typedef struct {
 
   // network outputs
   std::vector<NetworkNode> network_outputs;
-} InferenceEngineTVMConfig;
+}
+InferenceEngineTVMConfig;
 
-class InferenceEngineTVM : public InferenceEngine {
+class InferenceEngineTVM : public InferenceEngine
+{
 public:
-  InferenceEngineTVM(InferenceEngineTVMConfig config) : config_(config) {
+  explicit InferenceEngineTVM(InferenceEngineTVMConfig config) : config_(config)
+  {
     // load compiled functions
     std::ifstream module(config.network_module_path);
-    if (not module.good()) {
+    if (!module.good())
+    {
       throw std::runtime_error(
           "File " + config.network_module_path +
           " specified in inference_engine_tvm_config.h not "
@@ -194,7 +212,8 @@ public:
 
     // load json graph
     std::ifstream json_in(config.network_graph_path, std::ios::in);
-    if (not json_in.good()) {
+    if (!json_in.good())
+    {
       throw std::runtime_error(
           "File " + config.network_graph_path +
           " specified in inference_engine_tvm_config.h not "
@@ -206,7 +225,8 @@ public:
 
     // load parameters from binary file
     std::ifstream params_in(config.network_params_path, std::ios::binary);
-    if (not params_in.good()) {
+    if (!params_in.good())
+    {
       throw std::runtime_error(
           "File " + config.network_params_path +
           " specified in inference_engine_tvm_config.h not "
@@ -224,7 +244,7 @@ public:
     // create tvm runtime module
     tvm::runtime::Module runtime_mod =
         (*tvm::runtime::Registry::Get("tvm.graph_runtime.create"))(
-            json_data, mod, (int)config.tvm_device_type, config.tvm_device_id);
+            json_data, mod, static_cast<int>(config.tvm_device_type), config.tvm_device_id);
 
     // load parameters
     auto load_params = runtime_mod.GetFunction("load_params");
@@ -239,7 +259,8 @@ public:
     // get the function to get output data
     get_output = runtime_mod.GetFunction("get_output");
 
-    for (auto &output_config : config.network_outputs) {
+    for (auto &output_config : config.network_outputs)
+    {
       output_.push_back(
           TVMArrayContainer(output_config.second, config.tvm_dtype_code,
                             config.tvm_dtype_bits, config.tvm_dtype_lanes,
@@ -247,10 +268,13 @@ public:
     }
   }
 
-  TVMArrayContainerVector schedule(const TVMArrayContainerVector &input) {
+  TVMArrayContainerVector schedule(const TVMArrayContainerVector &input)
+  {
     // set input(s)
-    for (int index = 0; index < input.size(); ++index) {
-      if (input[index].getArray() == nullptr) {
+    for (int index = 0; index < input.size(); ++index)
+    {
+      if (input[index].getArray() == nullptr)
+      {
         throw std::runtime_error("input variable is null");
       }
       set_input(config_.network_inputs[index].first.c_str(),
@@ -261,8 +285,10 @@ public:
     execute();
 
     // get output(s)
-    for (int index = 0; index < output_.size(); ++index) {
-      if (output_[index].getArray() == nullptr) {
+    for (int index = 0; index < output_.size(); ++index)
+    {
+      if (output_[index].getArray() == nullptr)
+      {
         throw std::runtime_error("output variable is null");
       }
       get_output(index, output_[index].getArray());
@@ -278,5 +304,7 @@ private:
   tvm::runtime::PackedFunc get_output;
 };
 
-} // namespace pipeline
-} // namespace tvm_utility
+}  // namespace pipeline
+}  // namespace tvm_utility
+
+#endif  // TVM_UTILITY_PIPELINE_H

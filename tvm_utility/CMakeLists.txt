@@ -6,13 +6,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(autoware_build_flags REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 # set dependencies for the tests
 set(CATKIN_TEST_DEPENDS pcl_ros autoware_msgs)
 
 find_package(
   catkin REQUIRED
-  COMPONENTS ${CATKIN_TEST_DEPENDS}
+  COMPONENTS tvm_vendor roslint ${CATKIN_TEST_DEPENDS}
 )
 
 # declare dependency packages to catkin
@@ -24,10 +25,15 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${tvm_vendor_INCLUDE_DIRS}/tvm_vendor
 )
+
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
+roslint_cpp()
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
+  roslint_add_test()
 
   # compile each folder inside test/ as a test case
   file(GLOB test_cases test/*)
@@ -45,11 +51,10 @@ if(CATKIN_ENABLE_TESTING)
       catkin_add_gtest(${test_case_name} ${test_case_sources})
 
       # set extra properties of the target
-      set_property(TARGET ${test_case_name} PROPERTY CXX_STANDARD 11)
+      set_property(TARGET ${test_case_name} PROPERTY CXX_STANDARD 14)
       target_link_libraries(${test_case_name}
         ${catkin_LIBRARIES}
         boost_system
-        dl
         pthread
         tvm_runtime
         ${OpenCV_LIBS}

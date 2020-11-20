@@ -15,6 +15,9 @@
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>cmake_modules</buildtool_depend>
   <depend>pcl_ros</depend>
+  <depend>tvm_vendor</depend>
   <depend>autoware_msgs</depend>
   <test_depend>rostest</test_depend>
+  <test_depend>libboost-system-dev</test_depend>
+  <test_depend>libopencv-dev</test_depend>
 </package>
