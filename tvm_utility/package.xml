@@ -1,0 +1,23 @@
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+
+<package format="2">
+  <name>tvm_utility</name>
+  <version>0.1.0</version>
+  <description>
+    A set of utility functions to help build an machine learning pipeline using
+    TVM as the inference engine.
+  </description>
+  <maintainer email="liyou.zhou@arm.com">Liyou Zhou</maintainer>
+  <author email="luca.foschiani@arm.com">Luca Foschiani</author>
+  <license>Apache 2</license>
+
+  <buildtool_depend>autoware_build_flags</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>cmake_modules</buildtool_depend>
+  <depend>pcl_ros</depend>
+  <depend>tvm_vendor</depend>
+  <depend>autoware_msgs</depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>libboost-system-dev</test_depend>
+  <test_depend>libopencv-dev</test_depend>
+</package>
